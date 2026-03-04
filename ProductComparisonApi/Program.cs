@@ -1,0 +1,47 @@
+using ProductComparisonApi.Domain.Interfaces;
+using ProductComparisonApi.Infrastructure.Services;
+using System.Diagnostics.CodeAnalysis;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<IJsonFileReader, JsonFileReader>();
+builder.Services.AddSingleton<IProductService, ProductService>();
+builder.Services.AddScoped<IProductValidator, ProductValidator>();
+
+builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new()
+    {
+        Title = "Product Comparison API",
+        Version = "v1",
+        Description = "API para consultar y comparar productos por sus características."
+    });
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+var app = builder.Build();
+
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseCors();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+
+
+[ExcludeFromCodeCoverage]
+public partial class Program { }
