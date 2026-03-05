@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Infrastructure.Services;
 using System.Diagnostics.CodeAnalysis;
@@ -26,6 +27,12 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(policy =>
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
+
+builder.Services.AddHealthChecks()
+    .AddCheck<ProductsHealthCheck>(
+        name: "fuente_de_datos",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: new[] { "storage" });
 
 var app = builder.Build();
 

@@ -114,6 +114,8 @@ namespace ProductComparisonApi.Controllers
             }
         }
 
+        //////////////////// Endpoints de administración (CRUD) ////////////////////
+        
         /// <summary>
         /// POST /api/products
         /// Crea un nuevo producto en el inventario en memoria.

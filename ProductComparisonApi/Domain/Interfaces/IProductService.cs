@@ -12,5 +12,10 @@ namespace ProductComparisonApi.Domain.Interfaces
 
         Task<Product> PartialUpdateAsync(int id, UpdateProductRequest updated);
         Task<bool> DeleteAsync(int id);
+
+        // <summary>
+        /// Verifica que la fuente de datos esté disponible y sea accesible.
+        /// </summary>
+        Task<bool> IsHealthyAsync();
     }
 }
