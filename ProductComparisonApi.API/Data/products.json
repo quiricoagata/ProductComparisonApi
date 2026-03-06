@@ -1,0 +1,63 @@
+﻿[
+  {
+    "id": 1,
+    "nombre": "Laptop Pro X1",
+    "urlImagen": "https://placehold.co/400x300?text=Laptop+Pro+X1",
+    "descripcion": "Laptop de alto rendimiento para profesionales creativos.",
+    "precio": 1299.99,
+    "calificacion": 4.7,
+    "especificaciones": {
+      "Procesador": "Intel Core i7-13th Gen",
+      "RAM": "16 GB DDR5",
+      "Almacenamiento": "512 GB NVMe SSD",
+      "Pantalla": "15.6\" Full HD IPS",
+      "Batería": "72 Wh"
+    }
+  },
+  {
+    "id": 2,
+    "nombre": "Laptop UltraSlim Z5",
+    "urlImagen": "https://placehold.co/400x300?text=UltraSlim+Z5",
+    "descripcion": "Ultrabook delgada y liviana ideal para movilidad.",
+    "precio": 999.99,
+    "calificacion": 4.3,
+    "especificaciones": {
+      "Procesador": "AMD Ryzen 5 7000",
+      "RAM": "8 GB DDR4",
+      "Almacenamiento": "256 GB SSD",
+      "Pantalla": "14\" Full HD OLED",
+      "Batería": "60 Wh"
+    }
+  },
+  {
+    "id": 3,
+    "nombre": "Laptop Gaming Beast G9",
+    "urlImagen": "https://placehold.co/400x300?text=Gaming+Beast+G9",
+    "descripcion": "Potencia extrema para gaming y renderizado 3D.",
+    "precio": 1899.99,
+    "calificacion": 4.9,
+    "especificaciones": {
+      "Procesador": "Intel Core i9-13th Gen",
+      "RAM": "32 GB DDR5",
+      "Almacenamiento": "1 TB NVMe SSD",
+      "GPU": "NVIDIA RTX 4080",
+      "Pantalla": "17.3\" QHD 165Hz",
+      "Batería": "99 Wh"
+    }
+  },
+  {
+    "id": 4,
+    "nombre": "Laptop Office Essentials E3",
+    "urlImagen": "https://placehold.co/400x300?text=Office+E3",
+    "descripcion": "Laptop económica perfecta para ofimática y uso diario.",
+    "precio": 499.99,
+    "calificacion": 3.8,
+    "especificaciones": {
+      "Procesador": "Intel Core i3-12th Gen",
+      "RAM": "8 GB DDR4",
+      "Almacenamiento": "256 GB SSD",
+      "Pantalla": "15.6\" HD",
+      "Batería": "45 Wh"
+    }
+  }
+]

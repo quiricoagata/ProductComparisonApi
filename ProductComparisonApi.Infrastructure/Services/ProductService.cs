@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Domain.Models;
 
@@ -14,8 +14,8 @@ namespace ProductComparisonApi.Infrastructure.Services
         private readonly ILogger<ProductService> _logger;
         private readonly string _jsonPath;
 
-        // Permite solo una escritura al JSON a la vez
         private readonly SemaphoreSlim _writeLock = new(1, 1);
+
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -42,7 +42,6 @@ namespace ProductComparisonApi.Infrastructure.Services
             var products = JsonSerializer.Deserialize<List<Product>>(jsonContent, _jsonOptions)
                 ?? new List<Product>();
 
-            // Carga en el diccionario usando el ID como clave
             foreach (var product in products)
                 _products[product.Id] = product;
 

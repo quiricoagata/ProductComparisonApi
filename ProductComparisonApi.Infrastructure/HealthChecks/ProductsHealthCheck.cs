@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ProductComparisonApi.Domain.Interfaces;
 
-namespace ProductComparisonApi.Infrastructure.Services
+namespace ProductComparisonApi.Infrastructure.HealthChecks
 {
 
     public class ProductsHealthCheck : IHealthCheck

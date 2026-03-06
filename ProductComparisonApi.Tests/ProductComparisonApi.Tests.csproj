@@ -21,7 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProductComparisonApi\ProductComparisonApi.csproj" />
+    <ProjectReference Include="..\ProductComparisonApi.API\ProductComparisonApi.API.csproj" />
+    <ProjectReference Include="..\ProductComparisonApi.Application\ProductComparisonApi.Application.csproj" />
+    <ProjectReference Include="..\ProductComparisonApi.Domain\ProductComparisonApi.Domain.csproj" />
+    <ProjectReference Include="..\ProductComparisonApi.Infrastructure\ProductComparisonApi.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

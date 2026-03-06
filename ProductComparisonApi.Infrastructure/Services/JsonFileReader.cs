@@ -5,6 +5,11 @@ using System.Threading.Tasks;
 
 namespace ProductComparisonApi.Infrastructure.Services
 {
+    /// <summary>
+    /// Servicio para la lectura y escritura de archivos JSON.
+    /// Implementa la interfaz <see cref="IJsonFileReader"/> proporcionando métodos para acceder
+    /// al sistema de archivos con validaciones de parámetros de entrada.
+    /// </summary>
     public class JsonFileReader : IJsonFileReader
     {
         public string ReadAllText(string path) => File.ReadAllText(path);

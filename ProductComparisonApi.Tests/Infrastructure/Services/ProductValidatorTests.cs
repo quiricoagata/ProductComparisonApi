@@ -1,5 +1,5 @@
 ﻿using ProductComparisonApi.Domain.Models;
-using ProductComparisonApi.Infrastructure.Services;
+using ProductComparisonApi.Application.Services;
 
 namespace ProductComparisonApi.Tests.Infrastructure.Services
 {

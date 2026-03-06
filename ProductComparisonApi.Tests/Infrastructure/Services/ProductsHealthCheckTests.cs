@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using ProductComparisonApi.Domain.Interfaces;
+using ProductComparisonApi.Infrastructure.HealthChecks;
 using ProductComparisonApi.Infrastructure.Services;
 
 namespace ProductComparisonApi.Tests.Infrastructure.Services
