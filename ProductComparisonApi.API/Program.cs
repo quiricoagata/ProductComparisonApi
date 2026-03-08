@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ProductComparisonApi.Application.Services;
 using ProductComparisonApi.Domain.Interfaces;
@@ -13,7 +14,6 @@ builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddScoped<IProductValidator, ProductValidator>();
 
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -23,9 +23,7 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API para consultar y comparar productos por sus características."
     });
-
     c.EnableAnnotations();
-
     var xmlFile = "ProductComparisonApi.API.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -46,16 +44,35 @@ builder.Services.AddHealthChecks()
 
 var app = builder.Build();
 
-
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            duration = report.TotalDuration.ToString(),
+            entries = report.Entries.ToDictionary(
+                e => e.Key,
+                e => new
+                {
+                    status = e.Value.Status.ToString(),
+                    description = e.Value.Description,
+                    duration = e.Value.Duration.ToString()
+                })
+        };
+        await context.Response.WriteAsJsonAsync(result);
+    }
+});
 
 app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
-
 
 [ExcludeFromCodeCoverage]
 public partial class Program { }
