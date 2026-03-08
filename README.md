@@ -503,9 +503,9 @@ Response<object>.Empty("Producto eliminado correctamente.");
 
 `IProductService` e `IJsonFileReader` permiten intercambiar implementaciones sin tocar el controlador. Si se migra a SQL Server, solo cambia la implementación registrada en `Program.cs`.
 
-#### 🗄️ Repository (parcial)
+#### 🗄️ Service Layern Pattern
 
-`ProductService` centraliza todo el acceso a datos — lectura, escritura y persistencia. El resto de la aplicación no sabe cómo ni dónde están almacenados los productos.
+`ProductService` actúa como capa de servicio que centraliza tanto el acceso a datos como la lógica de negocio asociada a los productos.
 
 #### ➖ Null Object
 
