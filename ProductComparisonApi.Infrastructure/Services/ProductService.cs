@@ -26,33 +26,40 @@ namespace ProductComparisonApi.Infrastructure.Services
         public ProductService(
             ILogger<ProductService> logger,
             IWebHostEnvironment env,
-            IJsonFileReader fileReader,
-            IConfiguration configuration)
+            IJsonFileReader fileReader)
         {
             _logger = logger;
             _fileReader = fileReader;
-
-            // En producción usa DATA_PATH (volumen de Railway)
-            // En desarrollo usa el directorio base de la aplicación
-            var dataPath = configuration["DATA_PATH"] ?? AppContext.BaseDirectory;
-            _jsonPath = Path.Combine(dataPath, "Data", "products.json");
+            _jsonPath = fileReader.JsonPath;
 
             _logger.LogInformation("Ruta del archivo de datos: {Path}", _jsonPath);
 
-            if (!_fileReader.FileExists(_jsonPath))
+            try
             {
-                _logger.LogError("Archivo de datos no encontrado: {Path}", _jsonPath);
-                throw new FileNotFoundException("No se encontró el archivo de productos.", _jsonPath);
+                var jsonContent = _fileReader.ReadAllText(_jsonPath);
+                var products = JsonSerializer.Deserialize<List<Product>>(jsonContent, _jsonOptions)
+                    ?? new List<Product>();
+
+                foreach (var product in products)
+                    _products[product.Id] = product;
+
+                _logger.LogInformation("ProductService inicializado con {Count} productos.", _products.Count);
             }
-
-            var jsonContent = _fileReader.ReadAllText(_jsonPath);
-            var products = JsonSerializer.Deserialize<List<Product>>(jsonContent, _jsonOptions)
-                ?? new List<Product>();
-
-            foreach (var product in products)
-                _products[product.Id] = product;
-
-            _logger.LogInformation("ProductService inicializado con {Count} productos.", _products.Count);
+            catch (FileNotFoundException ex)
+            {
+                _logger.LogError(ex, "Archivo de datos no encontrado: {Path}", _jsonPath);
+                throw;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "El archivo de productos contiene JSON inválido.");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cargar los productos.");
+                throw;
+            }
         }
 
         public Task<List<Product>> GetAllAsync() =>
@@ -69,57 +76,94 @@ namespace ProductComparisonApi.Infrastructure.Services
 
         public async Task<Product> CreateAsync(Product product)
         {
-            product.Id = _products.IsEmpty ? 1 : _products.Keys.Max() + 1;
-            _products[product.Id] = product;
-            await SaveChangesAsync();
-            _logger.LogInformation("Producto creado con ID {Id}.", product.Id);
-            return product;
+            try
+            {
+                product.Id = _products.IsEmpty ? 1 : _products.Keys.Max() + 1;
+                _products[product.Id] = product;
+                await SaveChangesAsync();
+                _logger.LogInformation("Producto creado con ID {Id}.", product.Id);
+                return product;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear el producto.");
+                throw;
+            }
         }
 
         public async Task<Product> UpdateAsync(int id, Product updated)
         {
-            if (!_products.ContainsKey(id))
-                throw new KeyNotFoundException($"No existe un producto con ID {id}.");
+            try
+            {
+                if (!_products.ContainsKey(id))
+                    throw new KeyNotFoundException($"No existe un producto con ID {id}.");
 
-            updated.Id = id;
-            _products[id] = updated;
-            await SaveChangesAsync();
-            _logger.LogInformation("Producto {Id} actualizado.", id);
-            return updated;
+                updated.Id = id;
+                _products[id] = updated;
+                await SaveChangesAsync();
+                _logger.LogInformation("Producto {Id} actualizado.", id);
+                return updated;
+            }
+            catch (KeyNotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar el producto {Id}.", id);
+                throw;
+            }
         }
 
         public async Task<Product> PartialUpdateAsync(int id, UpdateProductRequest request)
         {
-            if (!_products.TryGetValue(id, out var existing))
-                throw new KeyNotFoundException($"No existe un producto con ID {id}.");
+            try
+            {
+                if (!_products.TryGetValue(id, out var existing))
+                    throw new KeyNotFoundException($"No existe un producto con ID {id}.");
 
-            if (request.Nombre is not null) existing.Nombre = request.Nombre;
-            if (request.UrlImagen is not null) existing.UrlImagen = request.UrlImagen;
-            if (request.Descripcion is not null) existing.Descripcion = request.Descripcion;
-            if (request.Precio is not null) existing.Precio = request.Precio.Value;
-            if (request.Calificacion is not null) existing.Calificacion = request.Calificacion.Value;
-            if (request.Especificaciones is not null) existing.Especificaciones = request.Especificaciones;
+                if (request.Nombre is not null) existing.Nombre = request.Nombre;
+                if (request.UrlImagen is not null) existing.UrlImagen = request.UrlImagen;
+                if (request.Descripcion is not null) existing.Descripcion = request.Descripcion;
+                if (request.Precio is not null) existing.Precio = request.Precio.Value;
+                if (request.Calificacion is not null) existing.Calificacion = request.Calificacion.Value;
+                if (request.Especificaciones is not null) existing.Especificaciones = request.Especificaciones;
 
-            _products[id] = existing;
-            await SaveChangesAsync();
-            _logger.LogInformation("Producto {Id} actualizado parcialmente.", id);
-            return existing;
+                _products[id] = existing;
+                await SaveChangesAsync();
+                _logger.LogInformation("Producto {Id} actualizado parcialmente.", id);
+                return existing;
+            }
+            catch (KeyNotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar parcialmente el producto {Id}.", id);
+                throw;
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var removed = _products.TryRemove(id, out _);
-            if (removed)
+            try
             {
-                await SaveChangesAsync();
-                _logger.LogInformation("Producto {Id} eliminado.", id);
+                var removed = _products.TryRemove(id, out _);
+                if (removed)
+                {
+                    await SaveChangesAsync();
+                    _logger.LogInformation("Producto {Id} eliminado.", id);
+                }
+                return removed;
             }
-            return removed;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al eliminar el producto {Id}.", id);
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Verifica que la fuente de datos (archivo JSON) esté disponible y sea accesible.
-        /// </summary>
         public Task<bool> IsHealthyAsync()
         {
             try
@@ -137,10 +181,6 @@ namespace ProductComparisonApi.Infrastructure.Services
             }
         }
 
-        /// <summary>
-        /// Serializa el diccionario y escribe al JSON.
-        /// El SemaphoreSlim garantiza que solo un request escriba a la vez.
-        /// </summary>
         private async Task SaveChangesAsync()
         {
             await _writeLock.WaitAsync();
@@ -149,6 +189,11 @@ namespace ProductComparisonApi.Infrastructure.Services
                 var json = JsonSerializer.Serialize(_products.Values.ToList(), _jsonOptions);
                 await _fileReader.WriteAllTextAsync(_jsonPath, json);
                 _logger.LogInformation("Cambios persistidos en {Path}.", _jsonPath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al persistir los cambios en {Path}.", _jsonPath);
+                throw;
             }
             finally
             {

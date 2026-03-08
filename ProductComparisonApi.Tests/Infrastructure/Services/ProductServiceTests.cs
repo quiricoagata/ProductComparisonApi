@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProductComparisonApi.Domain.Interfaces;
@@ -39,6 +38,8 @@ namespace ProductComparisonApi.Tests.Infrastructure.Services
             _mockEnv.Setup(e => e.ContentRootPath).Returns("");
             _fakePath = Path.Combine(AppContext.BaseDirectory, "Data", "products.json");
 
+            
+            _mockFileReader.Setup(f => f.JsonPath).Returns(_fakePath);
             _mockFileReader.Setup(f => f.FileExists(_fakePath)).Returns(true);
             _mockFileReader.Setup(f => f.ReadAllText(_fakePath))
                 .Returns(JsonSerializer.Serialize(_fakeProducts, _jsonOptions));
@@ -49,8 +50,7 @@ namespace ProductComparisonApi.Tests.Infrastructure.Services
 
         private ProductService CreateService()
         {
-            var mockConfig = new Mock<IConfiguration>();
-            return new ProductService(_mockLogger.Object, _mockEnv.Object, _mockFileReader.Object, mockConfig.Object);
+            return new ProductService(_mockLogger.Object, _mockEnv.Object, _mockFileReader.Object);
         }
 
 
@@ -426,9 +426,13 @@ namespace ProductComparisonApi.Tests.Infrastructure.Services
         [Fact]
         public void Constructor_ArchivoNoExiste_LanzaFileNotFoundException()
         {
-            _mockFileReader.Setup(f => f.FileExists(_fakePath)).Returns(false);
+            var mockFileReaderThrows = new Mock<IJsonFileReader>();
+            mockFileReaderThrows.Setup(f => f.JsonPath).Returns(_fakePath);
+            mockFileReaderThrows.Setup(f => f.ReadAllText(It.IsAny<string>()))
+                .Throws<FileNotFoundException>();
 
-            Assert.Throws<FileNotFoundException>(() => CreateService());
+            Assert.Throws<FileNotFoundException>(() => 
+                new ProductService(_mockLogger.Object, _mockEnv.Object, mockFileReaderThrows.Object));
         }
 
         [Fact]

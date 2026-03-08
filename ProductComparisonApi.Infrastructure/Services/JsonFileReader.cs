@@ -1,7 +1,5 @@
-﻿using ProductComparisonApi.Domain.Interfaces;
-using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Configuration;
+using ProductComparisonApi.Domain.Interfaces;
 
 namespace ProductComparisonApi.Infrastructure.Services
 {
@@ -12,7 +10,25 @@ namespace ProductComparisonApi.Infrastructure.Services
     /// </summary>
     public class JsonFileReader : IJsonFileReader
     {
-        public string ReadAllText(string path) => File.ReadAllText(path);
+        public string JsonPath { get; }
+
+        public JsonFileReader(IConfiguration configuration)
+        {
+            var dataPath = configuration["DATA_PATH"] ?? AppContext.BaseDirectory;
+            JsonPath = Path.Combine(dataPath, "Data", "products.json");
+        }
+
+        public string ReadAllText(string path)
+        {
+            if (path is null)
+                throw new ArgumentNullException(nameof(path));
+            
+            if (!File.Exists(path))
+                throw new FileNotFoundException("No se encontró el archivo.", path);
+            
+            return File.ReadAllText(path);
+        }
+
         public bool FileExists(string path) => File.Exists(path);
 
         public async Task WriteAllTextAsync(string path, string content)
