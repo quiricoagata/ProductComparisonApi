@@ -1,9 +1,10 @@
+```mermaid
 graph LR
-    subgraph "Presentaci髇"
+    subgraph "Presentaci贸n"
         PC["ProductController<br/>(API Layer)"]
     end
 
-    subgraph "Aplicaci髇"
+    subgraph "Aplicaci贸n"
         PV["ProductValidator<br/>(Validation)"]
     end
 
@@ -17,15 +18,15 @@ graph LR
         PJ["products.json<br/>(Data Storage)"]
     end
 
-    PC -->|Inyecci髇| PV
-    PC -->|Inyecci髇| PS
+    PC -->|Inyecci贸n| PV
+    PC -->|Inyecci贸n| PS
     PC -->|GetAll<br/>GetById<br/>GetByIds<br/>Create<br/>Update<br/>PartialUpdate<br/>Delete| PS
     PC -->|ValidateProductId<br/>ValidateProduct<br/>ValidateComparisonRequest<br/>ValidatePartialProduct| PV
 
-    PS -->|Inyecci髇| JFR
+    PS -->|Inyecci贸n| JFR
     PS -->|ReadAllText<br/>FileExists<br/>WriteAllTextAsync| JFR
 
-    PHC -->|Inyecci髇| PS
+    PHC -->|Inyecci贸n| PS
     PHC -->|IsHealthyAsync| PS
 
     JFR -->|Lee/Escribe| PJ
@@ -38,3 +39,4 @@ graph LR
     style JFR fill:#BD10E0,stroke:#8B0AA8,color:#fff
     style PHC fill:#50E3C2,stroke:#2A8A78,color:#fff
     style PJ fill:#B8E986,stroke:#7BA324,color:#000
+```
