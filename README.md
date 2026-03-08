@@ -26,7 +26,6 @@
 - [Testing](#-testing)
 - [Contribución](#-contribución)
 - [Autora](#-autora)
-- [Licencia](#-licencia)
 
 ---
 
