@@ -13,40 +13,46 @@ para generación de código, tests, casos de prueba, documentación y diagramas 
 ---
 
 ## 1. Generación de tests unitarios
-**Herramienta:** GitHub Copilot 
-**Archivos de referencia:** `#ProductsController.cs` `#ProductService.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
+**Herramienta:** GitHub Copilot  
+**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
 ```
 Generá tests unitarios completos para todos los archivos referenciados usando xUnit 2.x y Moq 4.x.
 
 ESTRUCTURA:
 ProductComparisonApi.Tests/
-├── Controllers/ProductsControllerTests.cs        → namespace ProductComparisonApi.Tests.Controllers
-├── Infrastructure/Services/ProductServiceTests.cs → namespace ProductComparisonApi.Tests.Infrastructure.Services
-├── Infrastructure/Services/ProductValidatorTests.cs → namespace ProductComparisonApi.Tests.Application.Services
+├── Controllers/ProductsControllerTests.cs              → namespace ProductComparisonApi.Tests.Controllers
+├── Application/Services/ProductServiceTests.cs         → namespace ProductComparisonApi.Tests.Application.Services
+├── Application/Services/ProductValidatorTests.cs       → namespace ProductComparisonApi.Tests.Application.Services
+├── Infrastructure/Repositories/ProductRepositoryTests.cs → namespace ProductComparisonApi.Tests.Infrastructure.Repositories
 └── Infrastructure/HealthChecks/ProductsHealthCheckTests.cs → namespace ProductComparisonApi.Tests.Infrastructure.HealthChecks
 
 REGLAS GENERALES:
 - Patrón Arrange / Act / Assert con comentarios explícitos
 - Nombres en español: MetodoTesteado_Escenario_ResultadoEsperado
 - Mockeá todas las dependencias, nunca uses implementaciones reales
-- Helper CreateService() / CreateController() para instanciar el SUT
+- Helper CreateService() / CreateRepository() / CreateController() para instanciar el SUT
 
-COBERTURA MÍNIMA: ProductValidator ~95% | Controller ~95% | ProductService ~95% | HealthCheck ~95%
-Cubrí: happy path, casos de error, casos límite, concurrencia y constructor de ProductService.
+COBERTURA MÍNIMA: ProductValidator ~95% | Controller ~95% | ProductService ~95% | ProductRepository ~95% | HealthCheck ~95%
+Cubrí: happy path, casos de error, casos límite, concurrencia y constructor de ProductRepository.
 
 ESPECÍFICO POR CLASE:
 - Controller: mockeá IProductService e IProductValidator. Verificá tipo de resultado y contenido de Response<T>.
-- ProductService: mockeá ILogger, IWebHostEnvironment, IJsonFileReader, IConfiguration (DATA_PATH → null).
+- ProductService (Application): mockeá IProductRepository e ILogger.
+  Verificá que cada método delega correctamente al repository.
+  Cubrí: delegación exitosa, propagación de KeyNotFoundException y propagación de excepciones de I/O.
+- ProductRepository (Infrastructure): mockeá ILogger, IWebHostEnvironment e IJsonFileReader.
   _fakePath = Path.Combine(AppContext.BaseDirectory, "Data", "products.json").
+  Mockeá JsonPath en IJsonFileReader retornando _fakePath.
   Incluí tests de concurrencia, constructor y que WriteAllTextAsync se llama una vez por operación.
 - ProductValidator: sin mocks. Casos límite: calificación 0 y 5, precio 0.01, strings vacíos y whitespace.
 - HealthCheck: mockeá IProductService. Cubrí: true → Healthy, false → Unhealthy, excepción → Unhealthy.
 ```
 
-## 2. Generación/Mejora del README
-**Herramienta:** GitHub Copilot / Claude (Anthropic)
-**Archivos de referencia:** `#ProductsController.cs` `#ProductService.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
+---
 
+## 2. Generación/Mejora del README
+**Herramienta:** GitHub Copilot / Claude (Anthropic)  
+**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
 ```
 Generá un README.md completo y profesional. Extraé nombres de clases, rutas,
 namespaces y configuraciones directamente del código. No inventes nada.
@@ -74,10 +80,11 @@ SECCIONES (en este orden):
     demostrar conocimiento de CRUD completo. Esta decisión es consciente.
 12. Autenticación — sin auth en v1, JWT planificado
 13. Errores — formato Response<T> + tabla de códigos 400/404/500
-14. Decisiones Arquitectónicas — Clean Architecture, dependencias forzadas por compilador,
-    patrones (DI, Factory Method, Strategy, Repository, Null Object, Middleware),
-    concurrencia con ConcurrentDictionary y SemaphoreSlim (necesarios porque JSON no tiene
-    control nativo de concurrencia, prescindibles al migrar a SQL Server)
+14. Decisiones Arquitectónicas — Clean Architecture con 5 proyectos, dependencias forzadas por compilador,
+    flujo Controller → IProductService → IProductRepository → IJsonFileReader → products.json,
+    patrones (DI, Factory Method, Strategy, Repository, Service Layer, Null Object, Middleware),
+    concurrencia con ConcurrentDictionary y SemaphoreSlim en ProductRepository (necesarios porque
+    JSON no tiene control nativo de concurrencia, prescindibles al migrar a SQL Server)
 15. Testing — estructura de carpetas, comandos dotnet test, cobertura esperada por clase,
     link al reporte, nota que Program.cs e interfaces están excluidos
 16. Contribución — fork, rama, Conventional Commits, prefijos feat/fix/docs/test/refactor
@@ -88,26 +95,26 @@ FORMATO:
 - Endpoints en código inline, métodos HTTP en negrita
 - Variables de entorno en MAYUSCULAS
 - Compatible con GitHub
-
 ```
 
 ---
 
 ## 3. Diagrama de arquitectura
 
-**Herramienta:** GitHub Copilot
-**Archivos de referencia:** `#solution` `#ProductsController.cs` `#ProductService.cs` `#JsonFileReader.cs` `#ProductsHealthCheck.cs` `#ProductValidator.cs`
+**Herramienta:** GitHub Copilot  
+**Archivos de referencia:** `#solution` `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#JsonFileReader.cs` `#ProductsHealthCheck.cs` `#ProductValidator.cs`
 ```
 Generá un diagrama Mermaid graph LR usando como referencia #solution
-#ProductsController.cs #ProductService.cs #JsonFileReader.cs
-#ProductsHealthCheck.cs #ProductValidator.cs #products.json
+#ProductsController.cs #ProductService.cs #ProductRepository.cs
+#JsonFileReader.cs #ProductsHealthCheck.cs #ProductValidator.cs #products.json
 que muestre las capas de la aplicación de forma horizontal
-con todas las conexiones y métodos intermedios.      
-          
+con todas las conexiones y métodos intermedios.
 ```
 
+---
+
 ## 4. Generación de datos de prueba
-**Herramienta:** GitHub Copilot / Claude (Anthropic) 
+**Herramienta:** GitHub Copilot / Claude (Anthropic)  
 **Archivos de referencia:** `#Product.cs` `#products.json`
 ```
 Generá un archivo products.json con 10 productos de prueba realistas.
@@ -123,6 +130,7 @@ REGLAS:
   Batería y Sistema Operativo para todos los productos
 - Los nombres, descripciones y especificaciones deben ser variados y representativos
 ```
+
 ---
 
 ## Nota
