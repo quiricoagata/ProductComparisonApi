@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "http": {
+    "ProductComparisonApi": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

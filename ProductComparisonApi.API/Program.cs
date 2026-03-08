@@ -1,9 +1,10 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using ProductComparisonApi.Application.Services;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Infrastructure.HealthChecks;
 using ProductComparisonApi.Infrastructure.Services;
-using ProductComparisonApi.Application.Services;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,13 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API para consultar y comparar productos por sus características."
     });
+
+    c.EnableAnnotations();
+
+    var xmlFile = "ProductComparisonApi.API.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+        c.IncludeXmlComments(xmlPath);
 });
 
 builder.Services.AddCors(options =>
@@ -37,7 +45,6 @@ builder.Services.AddHealthChecks()
         tags: new[] { "storage" });
 
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
