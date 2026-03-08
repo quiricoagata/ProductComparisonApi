@@ -295,6 +295,7 @@ var assemblies = [
   {
     "name": "ProductComparisonApi.Application",
     "classes": [
+      { "name": "ProductComparisonApi.Application.Services.ProductService", "rp": "ProductComparisonApi.Application_ProductService.html", "cl": 77, "ucl": 0, "cal": 77, "tl": 132, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "ProductComparisonApi.Application.Services.ProductValidator", "rp": "ProductComparisonApi.Application_ProductValidator.html", "cl": 36, "ucl": 2, "cal": 38, "tl": 73, "cb": 36, "tb": 42, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
@@ -309,8 +310,8 @@ var assemblies = [
     "name": "ProductComparisonApi.Infrastructure",
     "classes": [
       { "name": "ProductComparisonApi.Infrastructure.HealthChecks.ProductsHealthCheck", "rp": "ProductComparisonApi.Infrastructure_ProductsHealthCheck.html", "cl": 14, "ucl": 0, "cal": 14, "tl": 37, "cb": 2, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "ProductComparisonApi.Infrastructure.Services.JsonFileReader", "rp": "ProductComparisonApi.Infrastructure_JsonFileReader.html", "cl": 11, "ucl": 0, "cal": 11, "tl": 31, "cb": 5, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "ProductComparisonApi.Infrastructure.Services.ProductService", "rp": "ProductComparisonApi.Infrastructure_ProductService.html", "cl": 96, "ucl": 0, "cal": 96, "tl": 159, "cb": 25, "tb": 32, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.Infrastructure.Repositories.ProductRepository", "rp": "ProductComparisonApi.Infrastructure_ProductRepository.html", "cl": 130, "ucl": 4, "cal": 134, "tl": 202, "cb": 21, "tb": 28, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.Infrastructure.Services.JsonFileReader", "rp": "ProductComparisonApi.Infrastructure_JsonFileReader.html", "cl": 23, "ucl": 0, "cal": 23, "tl": 47, "cb": 12, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
 

@@ -1,20 +1,18 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Domain.Models;
 
-namespace ProductComparisonApi.Infrastructure.Services
+namespace ProductComparisonApi.Infrastructure.Repositories
 {
-    public class ProductService : IProductService
+    public class ProductRepository : IProductRepository
     {
         private readonly ConcurrentDictionary<int, Product> _products = new();
         private readonly IJsonFileReader _fileReader;
-        private readonly ILogger<ProductService> _logger;
+        private readonly ILogger<ProductRepository> _logger;
         private readonly string _jsonPath;
-
         private readonly SemaphoreSlim _writeLock = new(1, 1);
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
@@ -23,8 +21,8 @@ namespace ProductComparisonApi.Infrastructure.Services
             WriteIndented = true
         };
 
-        public ProductService(
-            ILogger<ProductService> logger,
+        public ProductRepository(
+            ILogger<ProductRepository> logger,
             IWebHostEnvironment env,
             IJsonFileReader fileReader)
         {
@@ -43,7 +41,7 @@ namespace ProductComparisonApi.Infrastructure.Services
                 foreach (var product in products)
                     _products[product.Id] = product;
 
-                _logger.LogInformation("ProductService inicializado con {Count} productos.", _products.Count);
+                _logger.LogInformation("ProductRepository inicializado con {Count} productos.", _products.Count);
             }
             catch (FileNotFoundException ex)
             {

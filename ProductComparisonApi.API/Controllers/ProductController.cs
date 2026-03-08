@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Domain.Models;
 using Swashbuckle.AspNetCore.Annotations;

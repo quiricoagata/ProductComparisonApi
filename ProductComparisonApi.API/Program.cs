@@ -3,6 +3,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using ProductComparisonApi.Application.Services;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Infrastructure.HealthChecks;
+using ProductComparisonApi.Infrastructure.Repositories;
 using ProductComparisonApi.Infrastructure.Services;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -10,6 +11,7 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<IJsonFileReader, JsonFileReader>();
+builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddScoped<IProductValidator, ProductValidator>();
 
