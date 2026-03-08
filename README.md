@@ -636,19 +636,3 @@ reportgenerator -reports:"coverage.opencover.xml" -targetdir:"coveragereport"
 **Ágata Quirico**
 
 Desarrollado como parte de un challenge técnico de backend.
-
----
-
-## 📄 Licencia
-
-Este proyecto está bajo la licencia MIT. Consulta el archivo `LICENSE` para más detalles.
-
----
-
-## 📞 Soporte
-
-Para reportar bugs o hacer sugerencias, por favor abre un issue en el repositorio.
-
----
-
-**¡Gracias por usar Product Comparison API!** 🚀
