@@ -1,42 +1,53 @@
 ```mermaid
 graph LR
-    subgraph "Presentación"
-        PC["ProductController<br/>(API Layer)"]
+    subgraph "API Layer"
+        PC["ProductsController<br/>─────────────────<br/>GetAll()<br/>GetById(id)<br/>Compare(request)<br/>Create(product)<br/>Update(id, product)<br/>PartialUpdate(id, request)<br/>Delete(id)"]
     end
 
-    subgraph "Aplicación"
-        PV["ProductValidator<br/>(Validation)"]
+    subgraph "Application Layer"
+        PV["ProductValidator<br/>─────────────────<br/>ValidateProductId(id)<br/>ValidateProduct(product)<br/>ValidateComparisonRequest(req)<br/>ValidatePartialProduct(req)"]
     end
 
-    subgraph "Infraestructura - Servicios"
-        PS["ProductService<br/>(Business Logic)"]
-        JFR["JsonFileReader<br/>(File Access)"]
-        PHC["ProductsHealthCheck<br/>(Health Check)"]
+    subgraph "Business Logic"
+        PS["ProductService<br/>─────────────────<br/>GetAllAsync()<br/>GetByIdAsync(id)<br/>GetByIdsAsync(ids)<br/>CreateAsync(product)<br/>UpdateAsync(id, updated)<br/>PartialUpdateAsync(id, req)<br/>DeleteAsync(id)<br/>IsHealthyAsync()"]
     end
 
-    subgraph "Infraestructura - Datos"
-        PJ["products.json<br/>(Data Storage)"]
+    subgraph "Infrastructure Layer"
+        PR["ProductRepository<br/>─────────────────<br/>ConcurrentDictionary<br/>SemaphoreSlim _writeLock<br/><br/>GetAllAsync()<br/>GetByIdAsync(id)<br/>GetByIdsAsync(ids)<br/>CreateAsync(product)<br/>UpdateAsync(id, updated)<br/>PartialUpdateAsync(id, req)<br/>DeleteAsync(id)<br/>IsHealthyAsync()<br/>SaveChangesAsync()"]
+        
+        JFR["JsonFileReader<br/>─────────────────<br/>JsonPath: string<br/><br/>ReadAllText(path)<br/>FileExists(path)<br/>WriteAllTextAsync(path, content)"]
+        
+        PHC["ProductsHealthCheck<br/>─────────────────<br/>IHealthCheck<br/><br/>CheckHealthAsync(context)"]
     end
 
-    PC -->|Inyección| PV
-    PC -->|Inyección| PS
+    subgraph "Data Storage"
+        JSON["products.json<br/>─────────────────<br/>id<br/>nombre<br/>urlImagen<br/>descripcion<br/>precio<br/>calificacion<br/>especificaciones"]
+    end
+
+    PC -->|Inyecta| PV
+    PC -->|Inyecta| PS
     PC -->|GetAll<br/>GetById<br/>GetByIds<br/>Create<br/>Update<br/>PartialUpdate<br/>Delete| PS
-    PC -->|ValidateProductId<br/>ValidateProduct<br/>ValidateComparisonRequest<br/>ValidatePartialProduct| PV
+    PC -->|Valida| PV
 
-    PS -->|Inyección| JFR
-    PS -->|ReadAllText<br/>FileExists<br/>WriteAllTextAsync| JFR
+    PV -.->|Retorna string?| PC
 
-    PHC -->|Inyección| PS
+    PS -->|Inyecta| PR
+    PS -->|GetAll<br/>GetById<br/>GetByIds<br/>Create<br/>Update<br/>PartialUpdate<br/>Delete<br/>IsHealthy| PR
+
+    PHC -->|Inyecta| PS
     PHC -->|IsHealthyAsync| PS
 
-    JFR -->|Lee/Escribe| PJ
+    PR -->|Inyecta| JFR
+    PR -->|ReadAllText<br/>FileExists<br/>WriteAllTextAsync| JFR
+    PR -.->|En memoria<br/>ConcurrentDictionary| JSON
 
-    PS -.->|Almacena<br/>ConcurrentDictionary| PJ
+    JFR -->|Lee/Escribe| JSON
 
     style PC fill:#4A90E2,stroke:#2E5C8A,color:#fff
     style PV fill:#7ED321,stroke:#4F8C14,color:#fff
     style PS fill:#F5A623,stroke:#C67B1A,color:#fff
-    style JFR fill:#BD10E0,stroke:#8B0AA8,color:#fff
-    style PHC fill:#50E3C2,stroke:#2A8A78,color:#fff
-    style PJ fill:#B8E986,stroke:#7BA324,color:#000
+    style PR fill:#BD10E0,stroke:#8B0AA8,color:#fff
+    style JFR fill:#50E3C2,stroke:#2A8A78,color:#fff
+    style PHC fill:#FFB347,stroke:#CC8833,color:#000
+    style JSON fill:#B8E986,stroke:#7BA324,color:#000
 ```
