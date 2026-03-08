@@ -1,4 +1,5 @@
-﻿# 🛒 Product Comparison API
+
+# 🛒 Product Comparison API
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://semver.org/)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com)
@@ -42,7 +43,7 @@
 - ✅ **Respuestas con envoltorio genérico** — Formato consistente `Response<T>` con campos `success`, `message` y `data`
 - ✅ **Manejo centralizado de errores** — Códigos HTTP semánticos (400, 404, 500) con mensajes descriptivos
 - ✅ **Documentación interactiva** — Swagger / OpenAPI disponible en `/swagger` (incluso en producción)
-- ✅ **Health check genérico** — Endpoint `/health` que verifica la fuente de datos a través de `IProductService.IsHealthyAsync()`
+- ✅ **Health check genérico** — Endpoint `/health` que verifica la fuente de datos a través de `IProductService.IsHealthyAsync()`, que delega en `IProductRepository.IsHealthyAsync()`
 - ✅ **Clean Architecture** — 4 proyectos separados: Domain, Application, Infrastructure y API con dependencias forzadas por el compilador
 - ✅ **Interfaces en todas las dependencias** — Facilita el mockeo en tests unitarios con xUnit y Moq
 - ✅ **Concurrencia thread-safe** — `ConcurrentDictionary` y `SemaphoreSlim` para acceso seguro desde múltiples requests
@@ -72,21 +73,21 @@
 | Proyecto | Tipo | Descripción |
 |----------|------|-------------|
 | **ProductComparisonApi.Domain** | Class Library | Modelos e interfaces sin dependencias externas. Núcleo del dominio. |
-| **ProductComparisonApi.Application** | Class Library | Lógica de negocio y validaciones (`ProductValidator`). |
-| **ProductComparisonApi.Infrastructure** | Class Library | Acceso a datos (`ProductService`, `JsonFileReader`), sistema de archivos y health checks. |
-| **ProductComparisonApi.API** | ASP.NET Core Web API | Controladores REST, configuración de servicios y punto de entrada. |
+| **ProductComparisonApi.Application** | Class Library | Lógica de negocio y orquestación (`ProductService`, `IProductService`). |
+| **ProductComparisonApi.Infrastructure** | Class Library | Acceso a datos (`ProductRepository`, `JsonFileReader`) y sistema de archivos. |
+| **ProductComparisonApi.API** | ASP.NET Core Web API | Controladores REST, health check, validaciones, configuración de servicios y punto de entrada. |
 | **ProductComparisonApi.Tests** | xUnit Test Project | Tests unitarios de todas las capas con Moq. |
 
 ### 🧭 Diagrama de dependencias
 
 ```
-| Proyecto | Depende de |
-|----------|-----------|
-| **Tests** | API, Infrastructure, Application, Domain |
-| **API**   | Infrastructure, Application, Domain |
-| **Infrastructure** | Domain |
-| **Application** | Domain |
-| **Domain** | — |
+| Proyecto           | Depende de                          |
+|--------------------|-------------------------------------|
+| **API**            | Application, Infrastructure         |
+| **Application**    | Domain                              |
+| **Infrastructure** | Domain                              |
+| **Domain**         | —                                   |
+| **Tests**          | API, Infrastructure, Application, Domain |
 ```
 
 Las dependencias son forzadas por el compilador: si intentas importar desde un proyecto de nivel superior a uno inferior, obtendrás error de compilación.
@@ -484,9 +485,10 @@ El archivo `products.json` vive en `ProductComparisonApi.Infrastructure/Data/` p
 Todos los servicios se registran en `Program.cs` y se inyectan por constructor:
 
 ```csharp
-builder.Services.AddSingleton<IJsonFileReader, JsonFileReader>();
+builder.Services.AddSingleton<JsonFileReader, JsonFileReader>();
+builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 builder.Services.AddSingleton<IProductService, ProductService>();
-builder.Services.AddScoped<IProductValidator, ProductValidator>();
+builder.Services.AddScoped<ProductValidator, ProductValidator>();
 ```
 
 #### 🏭 Factory Method
@@ -501,11 +503,15 @@ Response<object>.Empty("Producto eliminado correctamente.");
 
 #### 🔄 Strategy
 
-`IProductService` e `IJsonFileReader` permiten intercambiar implementaciones sin tocar el controlador. Si se migra a SQL Server, solo cambia la implementación registrada en `Program.cs`.
+`IProductService`, `IProductRepository` e `IJsonFileReader` permiten intercambiar implementaciones sin tocar el controlador. Si se migra a SQL Server, solo cambia la implementación de `IProductRepository` registrada en `Program.cs`.
 
-#### 🗄️ Service Layern Pattern
+#### 🗄️ Service Layer Pattern
 
-`ProductService` actúa como capa de servicio que centraliza tanto el acceso a datos como la lógica de negocio asociada a los productos.
+`ProductService` (Application) orquesta la lógica de negocio y delega el acceso a datos en `ProductRepository` (Infrastructure), siguiendo el flujo `Controller → IProductService → IProductRepository → IJsonFileReader → products.json`.
+
+#### 🗃️ Repository Pattern
+
+`ProductRepository` (Infrastructure) encapsula todo el acceso a datos: lectura y escritura del archivo JSON, gestión del `ConcurrentDictionary` en memoria y persistencia de cambios. El resto de las capas desconoce estos detalles.
 
 #### ➖ Null Object
 
@@ -533,9 +539,11 @@ private readonly SemaphoreSlim _writeLock = new(1, 1);
 
 Serializa las escrituras al archivo JSON para evitar que dos requests escriban simultáneamente y corrompan el archivo.
 
-Ambos mecanismos fueron incorporados deliberadamente porque al usar un **archivo JSON** 
-como capa de persistencia no se cuenta con los controles nativos de una base de datos 
-relacional. Al migrar a **SQL Server** serían prescindibles, ya que el motor maneja la 
+Ambos mecanismos viven en `ProductRepository`, que es la única clase que accede directamente al archivo JSON.
+
+Ambos mecanismos fueron incorporados deliberadamente porque al usar un **archivo JSON**
+como capa de persistencia no se cuenta con los controles nativos de una base de datos
+relacional. Al migrar a **SQL Server** serían prescindibles, ya que el motor maneja la
 concurrencia y las transacciones ACID de forma automática.
 
 ---
@@ -546,14 +554,17 @@ concurrencia y las transacciones ACID de forma automática.
 
 ```
 ProductComparisonApi.Tests/
-├── Controllers/
-│   └── ProductsControllerTests.cs
+├── API/
+│   ├── ProductsControllerTests.cs
+│   ├── ProductsHealthCheckTests.cs
+│   └── ProductValidatorTests.cs
+├── Application/
+│   └── Services/
+│       └── ProductServiceTests.cs
 └── Infrastructure/
-    ├── Services/
-    │   ├── ProductServiceTests.cs
-    │   └── ProductValidatorTests.cs
-    └── HealthChecks/
-        └── ProductsHealthCheckTests.cs
+    └── Repositories/
+        ├── ProductRepositoryTests.cs
+        └── JsonFileReaderTests.cs
 ```
 
 ### ▶️ Ejecutar tests
@@ -586,10 +597,11 @@ reportgenerator -reports:"coverage.opencover.xml" -targetdir:"coveragereport"
 | Componente | Cobertura |
 |-----------|----------|
 | **ProductValidator** | ~95% |
-| **ProductsController** | ~100% |
-| **ProductService** | ~100% |
-| **JsonFileReader** | ~100% |
-| **ProductsHealthCheck** | ~100% |
+| **ProductsController** | ~95% |
+| **ProductService** | ~95% |
+| **ProductRepository** | ~95% |
+| **JsonFileReader** | ~95% |
+| **ProductsHealthCheck** | ~95% |
 | **Program.cs** | Excluido (`[ExcludeFromCodeCoverage]`) |
 | **Interfaces** | Excluido |
 
