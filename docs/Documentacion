@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Comparison API-Documentacion</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="🛒-product-comparison-api">🛒 Product Comparison API</h1>
+<p><a href="https://semver.org/"><img src="https://img.shields.io/badge/version-1.0.0-blue.svg" alt="Version"></a><br>
+<a href="https://github.com"><img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="Build Status"></a><br>
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a><br>
+<a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET-8.0-512BD4.svg" alt=".NET Version"></a></p>
+<p><strong>API RESTful para consultar, comparar y gestionar productos.</strong> Expone endpoints para obtener detalles de productos, comparar múltiples items lado a lado y realizar operaciones CRUD completas. La persistencia de datos se simula mediante un archivo <code>products.json</code> local que actúa como base de datos.</p>
+<hr>
+<h2 id="tabla-de-contenidos">Tabla de contenidos</h2>
+<ul>
+<li><a href="#caracter%C3%ADsticas">Características</a></li>
+<li><a href="#tecnolog%C3%ADas">Tecnologías</a></li>
+<li><a href="#requisitos-previos">Requisitos previos</a></li>
+<li><a href="#instalaci%C3%B3n">Instalación</a></li>
+<li><a href="#docker">Docker</a></li>
+<li><a href="#configuraci%C3%B3n">Configuración</a></li>
+<li><a href="#demo">Demo</a></li>
+<li><a href="#uso">Uso</a></li>
+<li><a href="#endpoints">Endpoints</a></li>
+<li><a href="#autenticaci%C3%B3n">Autenticación</a></li>
+<li><a href="#errores">Errores</a></li>
+<li><a href="#decisiones-arquitect%C3%B3nicas-y-patrones-de-dise%C3%B1o">Decisiones Arquitectónicas y Patrones de Diseño</a></li>
+<li><a href="#testing">Testing</a></li>
+<li><a href="#contribuci%C3%B3n">Contribución</a></li>
+<li><a href="#autora">Autora</a></li>
+<li><a href="#licencia">Licencia</a></li>
+</ul>
+<hr>
+<h2 id="características">Características</h2>
+<ul>
+<li>✅ <strong>Consulta del catálogo completo</strong> — Obtén todos los productos disponibles en un único endpoint</li>
+<li>✅ <strong>Detalle de producto por ID</strong> — Accede a la información completa de un producto específico</li>
+<li>✅ <strong>Comparación de múltiples productos</strong> — Compara hasta N productos lado a lado con <code>GET /api/products/compare?ids=1&amp;ids=2</code></li>
+<li>✅ <strong>Creación de productos</strong> — Agrega nuevos productos con ID autogenerado (POST)</li>
+<li>✅ <strong>Actualización completa</strong> — Reemplaza todos los campos de un producto (PUT)</li>
+<li>✅ <strong>Actualización parcial</strong> — Modifica solo los campos enviados en el body (PATCH)</li>
+<li>✅ <strong>Eliminación de productos</strong> — Elimina permanentemente un producto del catálogo (DELETE)</li>
+<li>✅ <strong>Persistencia simulada</strong> — Los cambios se guardan en un archivo JSON local en <code>Infrastructure/Data/</code> y <strong>sobreviven al reinicio</strong></li>
+<li>✅ <strong>Respuestas con envoltorio genérico</strong> — Formato consistente <code>Response&lt;T&gt;</code> con campos <code>success</code>, <code>message</code> y <code>data</code></li>
+<li>✅ <strong>Manejo centralizado de errores</strong> — Códigos HTTP semánticos (400, 404, 500) con mensajes descriptivos</li>
+<li>✅ <strong>Documentación interactiva</strong> — Swagger / OpenAPI disponible en <code>/swagger</code> (incluso en producción)</li>
+<li>✅ <strong>Health check genérico</strong> — Endpoint <code>/health</code> que verifica la fuente de datos a través de <code>IProductService.IsHealthyAsync()</code></li>
+<li>✅ <strong>Clean Architecture</strong> — 4 proyectos separados: Domain, Application, Infrastructure y API con dependencias forzadas por el compilador</li>
+<li>✅ <strong>Interfaces en todas las dependencias</strong> — Facilita el mockeo en tests unitarios con xUnit y Moq</li>
+<li>✅ <strong>Concurrencia thread-safe</strong> — <code>ConcurrentDictionary</code> y <code>SemaphoreSlim</code> para acceso seguro desde múltiples requests</li>
+<li>✅ <strong>Deploy containerizado</strong> — Docker multi-stage con Railway y volumen persistente <code>/app/Data</code></li>
+<li>✅ <strong>Endpoints de administración</strong> — POST, PUT, PATCH, DELETE incluidos como extensión voluntaria para facilitar las pruebas y demostrar conocimiento de CRUD completo. No son requeridos por el enunciado del challenge.</li>
+</ul>
+<hr>
+<h2 id="tecnologías">Tecnologías</h2>
+<h3 id="stack-utilizado">Stack utilizado</h3>
+
+<table>
+<thead>
+<tr>
+<th>Tecnología</th>
+<th>Versión</th>
+<th>Propósito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>.NET</strong></td>
+<td>8.0</td>
+<td>Runtime y framework</td>
+</tr>
+<tr>
+<td><strong>C#</strong></td>
+<td>12.0</td>
+<td>Lenguaje de programación</td>
+</tr>
+<tr>
+<td><strong><a href="http://ASP.NET">ASP.NET</a> Core</strong></td>
+<td>8.0</td>
+<td>Web API y controllers</td>
+</tr>
+<tr>
+<td><strong>Swagger / Swashbuckle</strong></td>
+<td>6.x</td>
+<td>Documentación interactiva OpenAPI</td>
+</tr>
+<tr>
+<td><strong>xUnit</strong></td>
+<td>2.x</td>
+<td>Framework de testing unitario</td>
+</tr>
+<tr>
+<td><strong>Moq</strong></td>
+<td>4.x</td>
+<td>Mocking de dependencias en tests</td>
+</tr>
+<tr>
+<td><strong>System.Text.Json</strong></td>
+<td>Built-in</td>
+<td>Serialización JSON</td>
+</tr>
+<tr>
+<td><strong>Docker</strong></td>
+<td>Latest</td>
+<td>Containerización</td>
+</tr>
+<tr>
+<td><strong>Railway</strong></td>
+<td>Cloud</td>
+<td>Hosting en producción</td>
+</tr>
+</tbody>
+</table><h3 id="proyectos-de-la-solución">Proyectos de la solución</h3>
+
+<table>
+<thead>
+<tr>
+<th>Proyecto</th>
+<th>Tipo</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ProductComparisonApi.Domain</strong></td>
+<td>Class Library</td>
+<td>Modelos e interfaces sin dependencias externas. Núcleo del dominio.</td>
+</tr>
+<tr>
+<td><strong>ProductComparisonApi.Application</strong></td>
+<td>Class Library</td>
+<td>Lógica de negocio y validaciones (<code>ProductValidator</code>).</td>
+</tr>
+<tr>
+<td><strong>ProductComparisonApi.Infrastructure</strong></td>
+<td>Class Library</td>
+<td>Acceso a datos (<code>ProductService</code>, <code>JsonFileReader</code>), sistema de archivos y health checks.</td>
+</tr>
+<tr>
+<td><strong>ProductComparisonApi.API</strong></td>
+<td><a href="http://ASP.NET">ASP.NET</a> Core Web API</td>
+<td>Controladores REST, configuración de servicios y punto de entrada.</td>
+</tr>
+<tr>
+<td><strong>ProductComparisonApi.Tests</strong></td>
+<td>xUnit Test Project</td>
+<td>Tests unitarios de todas las capas con Moq.</td>
+</tr>
+</tbody>
+</table><h3 id="diagrama-de-dependencias">Diagrama de dependencias</h3>
+<pre><code>Tests ──────────┐
+                ├──&gt; API ──────────┐
+                │                 ├──&gt; Infrastructure ──┐
+                ├──&gt; Infrastructure    Application      ├──&gt; Domain
+                │                                      │
+                ├──&gt; Application ─────────────────────┘
+                │
+                └──&gt; Domain (sin dependencias externas)
+</code></pre>
+<p>Las dependencias son forzadas por el compilador: si intentas importar desde un proyecto de nivel superior a uno inferior, obtendrás error de compilación.</p>
+<hr>
+<h2 id="requisitos-previos">Requisitos previos</h2>
+<ul>
+<li><strong>.NET 8 SDK</strong> o superior — <a href="https://dotnet.microsoft.com/download">Descargar</a></li>
+<li><strong>Visual Studio 2022</strong> (17.8+) o <strong>Visual Studio Code</strong></li>
+<li><strong>Git</strong></li>
+<li><strong>Docker</strong> (opcional, para correr en contenedor)</li>
+</ul>
+<hr>
+<h2 id="instalación">Instalación</h2>
+<h3 id="clonar-el-repositorio">1. Clonar el repositorio</h3>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token function">git</span> clone https://github.com/usuario/ProductComparisonApi.git
+<span class="token function">cd</span> ProductComparisonApi
+</code></pre>
+<h3 id="restaurar-dependencias">2. Restaurar dependencias</h3>
+<pre class=" language-bash"><code class="prism  language-bash">dotnet restore
+</code></pre>
+<h3 id="verificar-configuración-de-archivos">3. Verificar configuración de archivos</h3>
+<p>Asegúrate de que <code>ProductComparisonApi.Infrastructure/Data/products.json</code> esté presente y configurado con <strong>“Copiar siempre”</strong> en Visual Studio:</p>
+<ul>
+<li>Click derecho en <code>products.json</code> → <strong>Propiedades</strong> → <strong>Copiar en directorio de salida: Copiar siempre</strong></li>
+</ul>
+<h3 id="compilar-la-solución">4. Compilar la solución</h3>
+<pre class=" language-bash"><code class="prism  language-bash">dotnet build
+</code></pre>
+<h3 id="ejecutar-la-api-en-desarrollo">5. Ejecutar la API en desarrollo</h3>
+<pre class=" language-bash"><code class="prism  language-bash">dotnet run --project ProductComparisonApi.API
+</code></pre>
+<h3 id="acceder-a-swagger">6. Acceder a Swagger</h3>
+<pre><code>http://localhost:5000/swagger
+</code></pre>
+<hr>
+<h2 id="docker">Docker</h2>
+<h3 id="buildear-la-imagen">Buildear la imagen</h3>
+<pre class=" language-bash"><code class="prism  language-bash">docker build -t productcomparisonapi:latest <span class="token keyword">.</span>
+</code></pre>
+<h3 id="ejecutar-el-contenedor">Ejecutar el contenedor</h3>
+<pre class=" language-bash"><code class="prism  language-bash">docker run -p 8080:8080 productcomparisonapi:latest
+</code></pre>
+<h3 id="volumen-persistente">Volumen persistente</h3>
+<p>En producción en Railway, se configura un volumen montado en <code>/app/Data</code> que persiste el archivo <code>products.json</code> entre despliegues:</p>
+<pre class=" language-bash"><code class="prism  language-bash">docker run -p 8080:8080 -v productos-volume:/app/Data productcomparisonapi:latest
+</code></pre>
+<p><strong>Configuración en Railway:</strong></p>
+<ul>
+<li><strong>Mount Path:</strong> <code>/app/Data</code></li>
+<li><strong>Variable de entorno:</strong> <code>DATA_PATH=/app</code></li>
+</ul>
+<h3 id="inicialización-automática">Inicialización automática</h3>
+<p>El script <code>entrypoint.sh</code> verifica si el archivo existe en el volumen. Si es el primer deploy, copia el backup desde <code>products.json.default</code>:</p>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token shebang important">#!/bin/bash</span>
+<span class="token keyword">if</span> <span class="token punctuation">[</span> <span class="token operator">!</span> -f <span class="token string">"/app/Data/products.json"</span> <span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token keyword">then</span>
+    <span class="token function">mkdir</span> -p /app/Data
+    <span class="token function">cp</span> /app/products.json.default /app/Data/products.json
+<span class="token keyword">fi</span>
+<span class="token function">exec</span> dotnet ProductComparisonApi.API.dll
+</code></pre>
+<hr>
+<h2 id="configuración">Configuración</h2>
+<h3 id="variables-de-entorno">Variables de entorno</h3>
+
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Descripción</th>
+<th>Obligatoria</th>
+<th>Valor por defecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ASPNETCORE_ENVIRONMENT</code></td>
+<td>Entorno de ejecución (<code>Development</code>, <code>Production</code>)</td>
+<td>No</td>
+<td><code>Production</code></td>
+</tr>
+<tr>
+<td><code>ASPNETCORE_URLS</code></td>
+<td>URL y puerto de escucha</td>
+<td>No</td>
+<td><code>http://+:8080</code></td>
+</tr>
+<tr>
+<td><code>DATA_PATH</code></td>
+<td>Ruta base del archivo JSON de productos</td>
+<td>No</td>
+<td><code>AppContext.BaseDirectory</code></td>
+</tr>
+</tbody>
+</table><h3 id="ejemplo-de-appsettings.development.json">Ejemplo de <code>appsettings.Development.json</code></h3>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"Logging"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token string">"LogLevel"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+      <span class="token string">"Default"</span><span class="token punctuation">:</span> <span class="token string">"Debug"</span><span class="token punctuation">,</span>
+      <span class="token string">"Microsoft.AspNetCore"</span><span class="token punctuation">:</span> <span class="token string">"Information"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token string">"AllowedHosts"</span><span class="token punctuation">:</span> <span class="token string">"*"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<hr>
+<h2 id="demo">Demo</h2>
+<h3 id="url-de-producción">URL de producción</h3>
+<pre><code>https://productcomparisonapi-production.up.railway.app
+</code></pre>
+<h3 id="links-directos">Links directos</h3>
+<ul>
+<li>📖 <strong>Swagger UI:</strong> <a href="https://productcomparisonapi-production.up.railway.app/swagger">https://productcomparisonapi-production.up.railway.app/swagger</a></li>
+<li>💚 <strong>Health Check:</strong> <a href="https://productcomparisonapi-production.up.railway.app/health">https://productcomparisonapi-production.up.railway.app/health</a></li>
+<li>📦 <strong>Todos los productos:</strong> <a href="https://productcomparisonapi-production.up.railway.app/api/products">https://productcomparisonapi-production.up.railway.app/api/products</a></li>
+</ul>
+<hr>
+<h2 id="uso">Uso</h2>
+<h3 id="en-desarrollo">En desarrollo</h3>
+<pre class=" language-bash"><code class="prism  language-bash">dotnet run --project ProductComparisonApi.API
+</code></pre>
+<h3 id="ejemplo-obtener-todos-los-productos">Ejemplo: Obtener todos los productos</h3>
+<pre class=" language-bash"><code class="prism  language-bash">curl -X GET <span class="token string">"https://productcomparisonapi-production.up.railway.app/api/products"</span> \
+  -H <span class="token string">"Content-Type: application/json"</span>
+</code></pre>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"4 productos encontrados."</span><span class="token punctuation">,</span>
+  <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+      <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Laptop Pro X1"</span><span class="token punctuation">,</span>
+      <span class="token string">"urlImagen"</span><span class="token punctuation">:</span> <span class="token string">"https://placehold.co/400x300?text=Laptop+Pro+X1"</span><span class="token punctuation">,</span>
+      <span class="token string">"descripcion"</span><span class="token punctuation">:</span> <span class="token string">"Laptop de alto rendimiento para profesionales creativos."</span><span class="token punctuation">,</span>
+      <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1299.99</span><span class="token punctuation">,</span>
+      <span class="token string">"calificacion"</span><span class="token punctuation">:</span> <span class="token number">4.7</span><span class="token punctuation">,</span>
+      <span class="token string">"especificaciones"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"Procesador"</span><span class="token punctuation">:</span> <span class="token string">"Intel Core i7-13th Gen"</span><span class="token punctuation">,</span>
+        <span class="token string">"RAM"</span><span class="token punctuation">:</span> <span class="token string">"16 GB DDR5"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="ejemplo-comparar-productos">Ejemplo: Comparar productos</h3>
+<pre class=" language-bash"><code class="prism  language-bash">curl -X GET <span class="token string">"https://productcomparisonapi-production.up.railway.app/api/products/compare?ids=1&amp;ids=3"</span> \
+  -H <span class="token string">"Content-Type: application/json"</span>
+</code></pre>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Comparando 2 productos."</span><span class="token punctuation">,</span>
+  <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Laptop Pro X1"</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1299.99</span><span class="token punctuation">,</span> <span class="token string">"calificacion"</span><span class="token punctuation">:</span> <span class="token number">4.7</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Gaming Beast G9"</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1899.99</span><span class="token punctuation">,</span> <span class="token string">"calificacion"</span><span class="token punctuation">:</span> <span class="token number">4.9</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<hr>
+<h2 id="endpoints">Endpoints</h2>
+<h3 id="resumen">Resumen</h3>
+
+<table>
+<thead>
+<tr>
+<th>Método</th>
+<th>Ruta</th>
+<th>Descripción</th>
+<th>Categoría</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GET</strong></td>
+<td><code>/api/products</code></td>
+<td>Obtiene todos los productos</td>
+<td>Consulta</td>
+</tr>
+<tr>
+<td><strong>GET</strong></td>
+<td><code>/api/products/{id}</code></td>
+<td>Obtiene un producto por ID</td>
+<td>Consulta</td>
+</tr>
+<tr>
+<td><strong>GET</strong></td>
+<td><code>/api/products/compare</code></td>
+<td>Compara múltiples productos</td>
+<td>Consulta</td>
+</tr>
+<tr>
+<td><strong>POST</strong></td>
+<td><code>/api/products</code></td>
+<td>Crea un nuevo producto</td>
+<td>Administración</td>
+</tr>
+<tr>
+<td><strong>PUT</strong></td>
+<td><code>/api/products/{id}</code></td>
+<td>Actualiza un producto completo</td>
+<td>Administración</td>
+</tr>
+<tr>
+<td><strong>PATCH</strong></td>
+<td><code>/api/products/{id}</code></td>
+<td>Actualiza parcialmente un producto</td>
+<td>Administración</td>
+</tr>
+<tr>
+<td><strong>DELETE</strong></td>
+<td><code>/api/products/{id}</code></td>
+<td>Elimina un producto</td>
+<td>Administración</td>
+</tr>
+<tr>
+<td><strong>GET</strong></td>
+<td><code>/health</code></td>
+<td>Verifica la salud de la API</td>
+<td>Monitoreo</td>
+</tr>
+</tbody>
+</table><blockquote>
+<p><strong>Nota:</strong> Los endpoints <strong>GET</strong> <code>/api/products</code>, <strong>GET</strong> <code>/api/products/{id}</code> y<br>
+<strong>GET</strong> <code>/api/products/compare</code> constituyen el núcleo funcional requerido por el challenge.<br>
+Los endpoints de escritura (<strong>POST</strong>, <strong>PUT</strong>, <strong>PATCH</strong>, <strong>DELETE</strong>) fueron agregados de forma<br>
+intencional por dos razones: facilitar las pruebas de la API sin necesidad de herramientas<br>
+externas, y demostrar conocimiento de CRUD completo, manejo de concurrencia, validaciones<br>
+parciales con PATCH y cobertura de tests unitarios sobre operaciones de escritura.<br>
+Esta decisión es consciente y no implica una malinterpretación del objetivo del challenge.</p>
+</blockquote>
+<h3 id="get-apiproducts">GET /api/products</h3>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"4 productos encontrados."</span><span class="token punctuation">,</span>
+  <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Laptop Pro X1"</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1299.99</span><span class="token punctuation">,</span> <span class="token string">"calificacion"</span><span class="token punctuation">:</span> <span class="token number">4.7</span> <span class="token punctuation">}</span> <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="get-apiproductsid">GET /api/products/{id}</h3>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+  <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Laptop Pro X1"</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1299.99</span><span class="token punctuation">,</span> <span class="token string">"calificacion"</span><span class="token punctuation">:</span> <span class="token number">4.7</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Response (404 Not Found):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span> <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"No existe un producto con ID 99."</span><span class="token punctuation">,</span> <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+</code></pre>
+<h3 id="get-apiproductscompare">GET /api/products/compare</h3>
+<p><strong>Request:</strong> <code>GET /api/products/compare?ids=1&amp;ids=3</code></p>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Comparando 2 productos."</span><span class="token punctuation">,</span>
+  <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Laptop Pro X1"</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1299.99</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Gaming Beast G9"</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1899.99</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Response (400 Bad Request) — Menos de 2 IDs:</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span> <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Debes enviar al menos 2 IDs de productos."</span><span class="token punctuation">,</span> <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Response (400 Bad Request) — IDs duplicados:</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span> <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"La lista contiene IDs duplicados."</span><span class="token punctuation">,</span> <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+</code></pre>
+<h3 id="post-apiproducts">POST /api/products</h3>
+<p><strong>Request:</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Laptop Nueva"</span><span class="token punctuation">,</span>
+  <span class="token string">"urlImagen"</span><span class="token punctuation">:</span> <span class="token string">"https://img.com/nueva.jpg"</span><span class="token punctuation">,</span>
+  <span class="token string">"descripcion"</span><span class="token punctuation">:</span> <span class="token string">"Laptop de última generación"</span><span class="token punctuation">,</span>
+  <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">799.99</span><span class="token punctuation">,</span>
+  <span class="token string">"calificacion"</span><span class="token punctuation">:</span> <span class="token number">4.2</span><span class="token punctuation">,</span>
+  <span class="token string">"especificaciones"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token string">"RAM"</span><span class="token punctuation">:</span> <span class="token string">"8GB"</span><span class="token punctuation">,</span> <span class="token string">"Almacenamiento"</span><span class="token punctuation">:</span> <span class="token string">"256GB SSD"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Response (201 Created):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Producto creado correctamente."</span><span class="token punctuation">,</span>
+  <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">5</span><span class="token punctuation">,</span> <span class="token string">"nombre"</span><span class="token punctuation">:</span> <span class="token string">"Laptop Nueva"</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">799.99</span><span class="token punctuation">,</span> <span class="token string">"calificacion"</span><span class="token punctuation">:</span> <span class="token number">4.2</span> <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="put-apiproductsid">PUT /api/products/{id}</h3>
+<p><strong>Request:</strong> Igual que POST con todos los campos requeridos.</p>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span> <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Producto actualizado correctamente."</span><span class="token punctuation">,</span> <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">1</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+</code></pre>
+<h3 id="patch-apiproductsid">PATCH /api/products/{id}</h3>
+<p><strong>Request (solo los campos a modificar):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1199.99</span> <span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span> <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Producto actualizado parcialmente."</span><span class="token punctuation">,</span> <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"precio"</span><span class="token punctuation">:</span> <span class="token number">1199.99</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+</code></pre>
+<h3 id="delete-apiproductsid">DELETE /api/products/{id}</h3>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span> <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Producto 1 eliminado correctamente."</span><span class="token punctuation">,</span> <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+</code></pre>
+<h3 id="get-health">GET /health</h3>
+<p><strong>Response (200 OK):</strong></p>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"status"</span><span class="token punctuation">:</span> <span class="token string">"Healthy"</span><span class="token punctuation">,</span>
+  <span class="token string">"duration"</span><span class="token punctuation">:</span> <span class="token string">"00:00:00.0234567"</span><span class="token punctuation">,</span>
+  <span class="token string">"entries"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token string">"fuente_de_datos"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+      <span class="token string">"status"</span><span class="token punctuation">:</span> <span class="token string">"Healthy"</span><span class="token punctuation">,</span>
+      <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+      <span class="token string">"duration"</span><span class="token punctuation">:</span> <span class="token string">"00:00:00.0150000"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<hr>
+<h2 id="autenticación">Autenticación</h2>
+<p>La versión actual <strong>no requiere autenticación</strong>. Todos los endpoints son públicos.</p>
+<p>En versiones futuras se implementaría <strong>JWT (JSON Web Tokens)</strong> para autenticación stateless y roles para proteger los endpoints de administración.</p>
+<hr>
+<h2 id="errores">Errores</h2>
+<h3 id="formato-estándar">Formato estándar</h3>
+<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+  <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Descripción del error"</span><span class="token punctuation">,</span>
+  <span class="token string">"data"</span><span class="token punctuation">:</span> <span class="token keyword">null</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="códigos-de-error-http">Códigos de error HTTP</h3>
+
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>400</strong></td>
+<td>ID inválido — debe ser mayor a 0</td>
+</tr>
+<tr>
+<td><strong>400</strong></td>
+<td>Campo requerido vacío</td>
+</tr>
+<tr>
+<td><strong>400</strong></td>
+<td>Precio inválido — debe ser mayor a 0</td>
+</tr>
+<tr>
+<td><strong>400</strong></td>
+<td>Calificación fuera de rango — debe estar entre 0 y 5</td>
+</tr>
+<tr>
+<td><strong>400</strong></td>
+<td>Menos de 2 IDs en comparación</td>
+</tr>
+<tr>
+<td><strong>400</strong></td>
+<td>IDs duplicados en comparación</td>
+</tr>
+<tr>
+<td><strong>404</strong></td>
+<td>Producto no encontrado</td>
+</tr>
+<tr>
+<td><strong>404</strong></td>
+<td>Uno o más IDs no existen</td>
+</tr>
+<tr>
+<td><strong>500</strong></td>
+<td>Error interno del servidor</td>
+</tr>
+</tbody>
+</table><hr>
+<h2 id="decisiones-arquitectónicas-y-patrones-de-diseño">Decisiones Arquitectónicas y Patrones de Diseño</h2>
+<h3 id="clean-architecture">Clean Architecture</h3>
+<p>La solución implementa <strong>Clean Architecture</strong> dividiendo la aplicación en 4 proyectos con responsabilidades claramente separadas. Las dependencias entre capas son <strong>forzadas por el compilador</strong>, no solo por convención. Si se intenta importar desde un proyecto de nivel superior a uno inferior, el compilador lanza error.</p>
+<h3 id="ubicación-de-products.json">Ubicación de <code>products.json</code></h3>
+<p>El archivo <code>products.json</code> vive en <code>ProductComparisonApi.Infrastructure/Data/</code> porque simula la base de datos y su acceso es responsabilidad de la capa de infraestructura. En Docker se copia al volumen montado en <code>/app/Data</code>.</p>
+<h3 id="patrones-implementados">Patrones implementados</h3>
+<h4 id="dependency-injection">Dependency Injection</h4>
+<p>Todos los servicios se registran en <code>Program.cs</code> y se inyectan por constructor:</p>
+<pre class=" language-csharp"><code class="prism  language-csharp">builder<span class="token punctuation">.</span>Services<span class="token punctuation">.</span><span class="token generic-method function">AddSingleton<span class="token punctuation">&lt;</span>IJsonFileReader<span class="token punctuation">,</span> JsonFileReader<span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+builder<span class="token punctuation">.</span>Services<span class="token punctuation">.</span><span class="token generic-method function">AddSingleton<span class="token punctuation">&lt;</span>IProductService<span class="token punctuation">,</span> ProductService<span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+builder<span class="token punctuation">.</span>Services<span class="token punctuation">.</span><span class="token generic-method function">AddScoped<span class="token punctuation">&lt;</span>IProductValidator<span class="token punctuation">,</span> ProductValidator<span class="token punctuation">&gt;</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h4 id="factory-method">Factory Method</h4>
+<p><code>Response&lt;T&gt;</code> expone métodos estáticos para crear respuestas sin exponer el constructor:</p>
+<pre class=" language-csharp"><code class="prism  language-csharp">Response<span class="token operator">&lt;</span>Product<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token function">Ok</span><span class="token punctuation">(</span>product<span class="token punctuation">,</span> <span class="token string">"Producto encontrado."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Response<span class="token operator">&lt;</span><span class="token keyword">object</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token function">Fail</span><span class="token punctuation">(</span><span class="token string">"No existe un producto con ese ID."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+Response<span class="token operator">&lt;</span><span class="token keyword">object</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token function">Empty</span><span class="token punctuation">(</span><span class="token string">"Producto eliminado correctamente."</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<h4 id="strategy">Strategy</h4>
+<p><code>IProductService</code> e <code>IJsonFileReader</code> permiten intercambiar implementaciones sin tocar el controlador. Si se migra a SQL Server, solo cambia la implementación registrada en <code>Program.cs</code>.</p>
+<h4 id="repository-parcial">Repository (parcial)</h4>
+<p><code>ProductService</code> centraliza todo el acceso a datos — lectura, escritura y persistencia. El resto de la aplicación no sabe cómo ni dónde están almacenados los productos.</p>
+<h4 id="null-object">Null Object</h4>
+<p><code>Response&lt;object&gt;.Empty()</code> devuelve un objeto válido en operaciones exitosas sin datos (como DELETE), evitando que el cliente reciba <code>null</code>.</p>
+<h4 id="decorator--middleware">Decorator / Middleware</h4>
+<p>El health check actúa como decorador del pipeline HTTP, verificando la disponibilidad de la fuente de datos sin afectar la lógica de negocio.</p>
+<h3 id="concurrencia">Concurrencia</h3>
+<h4 id="concurrentdictionary">ConcurrentDictionary</h4>
+<pre class=" language-csharp"><code class="prism  language-csharp"><span class="token keyword">private</span> <span class="token keyword">readonly</span> ConcurrentDictionary<span class="token operator">&lt;</span><span class="token keyword">int</span><span class="token punctuation">,</span> Product<span class="token operator">&gt;</span> _products <span class="token operator">=</span> <span class="token keyword">new</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Reemplaza <code>List&lt;T&gt;</code> para garantizar acceso thread-safe desde múltiples requests simultáneos sin locks explícitos.</p>
+<h4 id="semaphoreslim">SemaphoreSlim</h4>
+<pre class=" language-csharp"><code class="prism  language-csharp"><span class="token keyword">private</span> <span class="token keyword">readonly</span> SemaphoreSlim _writeLock <span class="token operator">=</span> <span class="token keyword">new</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Serializa las escrituras al archivo JSON para evitar que dos requests escriban simultáneamente y corrompan el archivo.</p>
+<p>Ambos mecanismos fueron incorporados deliberadamente porque al usar un <strong>archivo JSON</strong><br>
+como capa de persistencia no se cuenta con los controles nativos de una base de datos<br>
+relacional. Al migrar a <strong>SQL Server</strong> serían prescindibles, ya que el motor maneja la<br>
+concurrencia y las transacciones ACID de forma automática.</p>
+<hr>
+<h2 id="testing">Testing</h2>
+<h3 id="estructura">Estructura</h3>
+<pre><code>ProductComparisonApi.Tests/
+├── Controllers/
+│   └── ProductsControllerTests.cs
+└── Infrastructure/
+    ├── Services/
+    │   ├── ProductServiceTests.cs
+    │   └── ProductValidatorTests.cs
+    └── HealthChecks/
+        └── ProductsHealthCheckTests.cs
+</code></pre>
+<h3 id="ejecutar-tests">Ejecutar tests</h3>
+<pre class=" language-bash"><code class="prism  language-bash"><span class="token comment"># Todos los tests</span>
+dotnet <span class="token function">test</span>
+
+<span class="token comment"># Tests de un proyecto específico</span>
+dotnet <span class="token function">test</span> ProductComparisonApi.Tests
+
+<span class="token comment"># Filtrar por clase</span>
+dotnet <span class="token function">test</span> --filter <span class="token string">"ClassName~ProductValidatorTests"</span>
+
+<span class="token comment"># Con output verbose</span>
+dotnet <span class="token function">test</span> --verbosity detailed
+</code></pre>
+<h3 id="generar-reporte-de-cobertura">Generar reporte de cobertura</h3>
+<pre class=" language-bash"><code class="prism  language-bash">dotnet <span class="token function">test</span> /p:CollectCoverage<span class="token operator">=</span>true /p:CoverletOutputFormat<span class="token operator">=</span>opencover
+reportgenerator -reports:<span class="token string">"coverage.opencover.xml"</span> -targetdir:<span class="token string">"coveragereport"</span>
+</code></pre>
+<p>📊 <strong>Reporte de cobertura:</strong> <a href="https://quiricoagata.github.io/ProductComparisonApi/coverage/index.html">https://quiricoagata.github.io/ProductComparisonApi/coverage/index.html</a></p>
+<h3 id="cobertura-esperada">Cobertura esperada</h3>
+
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Cobertura</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ProductValidator</strong></td>
+<td>~95%</td>
+</tr>
+<tr>
+<td><strong>ProductsController</strong></td>
+<td>~100%</td>
+</tr>
+<tr>
+<td><strong>ProductService</strong></td>
+<td>~100%</td>
+</tr>
+<tr>
+<td><strong>JsonFileReader</strong></td>
+<td>~100%</td>
+</tr>
+<tr>
+<td><strong>ProductsHealthCheck</strong></td>
+<td>~100%</td>
+</tr>
+<tr>
+<td><strong>Program.cs</strong></td>
+<td>Excluido (<code>[ExcludeFromCodeCoverage]</code>)</td>
+</tr>
+<tr>
+<td><strong>Interfaces</strong></td>
+<td>Excluido</td>
+</tr>
+</tbody>
+</table><hr>
+<h2 id="contribución">Contribución</h2>
+<ol>
+<li>Fork del repositorio</li>
+<li>Crear rama: <code>git checkout -b feat/nueva-funcionalidad</code></li>
+<li>Commit con Conventional Commits: <code>git commit -m "feat: descripción"</code></li>
+<li>Push: <code>git push origin feat/nueva-funcionalidad</code></li>
+<li>Abrir Pull Request</li>
+</ol>
+<h3 id="prefijos-de-commits">Prefijos de commits</h3>
+
+<table>
+<thead>
+<tr>
+<th>Prefijo</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>feat</code></td>
+<td>Nueva funcionalidad</td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td>Corrección de bug</td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td>Documentación</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td>Tests</td>
+</tr>
+<tr>
+<td><code>refactor</code></td>
+<td>Refactorización</td>
+</tr>
+</tbody>
+</table><hr>
+<h2 id="autora">Autora</h2>
+<p><strong>Ágata Quirico</strong></p>
+<p>Desarrollado como parte de un challenge técnico de backend.</p>
+</div>
+</body>
+
+</html>
