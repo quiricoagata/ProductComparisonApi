@@ -14,7 +14,7 @@ para generación de código, tests, casos de prueba, documentación y diagramas 
 
 ## 1. Generación de tests unitarios
 **Herramienta:** GitHub Copilot  
-**Archivos de referencia:** `#ProductsController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
+**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
 ```
 Generá tests unitarios completos para todos los archivos referenciados usando xUnit 2.x y Moq 4.x.
 
@@ -52,7 +52,7 @@ ESPECÍFICO POR CLASE:
 
 ## 2. Generación/Mejora del README
 **Herramienta:** GitHub Copilot / Claude (Anthropic)  
-**Archivos de referencia:** `#ProductsController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
+**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
 ```
 Generá un README.md completo y profesional. Extraé nombres de clases, rutas,
 namespaces y configuraciones directamente del código. No inventes nada.
@@ -102,7 +102,7 @@ FORMATO:
 ## 3. Diagrama de arquitectura
 
 **Herramienta:** GitHub Copilot  
-**Archivos de referencia:** `#solution` `#ProductsController.cs` `#ProductService.cs` `#ProductRepository.cs` `#JsonFileReader.cs` `#ProductsHealthCheck.cs` `#ProductValidator.cs`
+**Archivos de referencia:** `#solution` `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#JsonFileReader.cs` `#ProductsHealthCheck.cs` `#ProductValidator.cs`
 ```
 Generá un diagrama Mermaid graph LR usando como referencia #solution
 #ProductsController.cs #ProductService.cs #ProductRepository.cs
