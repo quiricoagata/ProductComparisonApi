@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
-using ProductComparisonApi.Domain.Interfaces;
-using ProductComparisonApi.Infrastructure.HealthChecks;
-using ProductComparisonApi.Infrastructure.Services;
+using ProductComparisonApi.API.HealthChecks;
+using ProductComparisonApi.Application.Interfaces;
 
-namespace ProductComparisonApi.Tests.Infrastructure.Services
+
+namespace ProductComparisonApi.Tests.API
 {
     public class ProductsHealthCheckTests
     {

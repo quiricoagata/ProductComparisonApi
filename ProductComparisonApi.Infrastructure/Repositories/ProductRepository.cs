@@ -10,7 +10,7 @@ namespace ProductComparisonApi.Infrastructure.Repositories
     public class ProductRepository : IProductRepository
     {
         private readonly ConcurrentDictionary<int, Product> _products = new();
-        private readonly IJsonFileReader _fileReader;
+        private readonly JsonFileReader _fileReader;
         private readonly ILogger<ProductRepository> _logger;
         private readonly string _jsonPath;
         private readonly SemaphoreSlim _writeLock = new(1, 1);
@@ -24,7 +24,7 @@ namespace ProductComparisonApi.Infrastructure.Repositories
         public ProductRepository(
             ILogger<ProductRepository> logger,
             IWebHostEnvironment env,
-            IJsonFileReader fileReader)
+            JsonFileReader fileReader)
         {
             _logger = logger;
             _fileReader = fileReader;

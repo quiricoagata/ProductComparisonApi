@@ -290,13 +290,14 @@ var assemblies = [
   {
     "name": "ProductComparisonApi.API",
     "classes": [
-      { "name": "ProductComparisonApi.Controllers.ProductsController", "rp": "ProductComparisonApi.API_ProductsController.html", "cl": 119, "ucl": 0, "cal": 119, "tl": 443, "cb": 22, "tb": 22, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.API.Validator.ProductValidator", "rp": "ProductComparisonApi.API_ProductValidator.html", "cl": 36, "ucl": 2, "cal": 38, "tl": 73, "cb": 36, "tb": 42, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.Controllers.ProductsController", "rp": "ProductComparisonApi.API_ProductsController.html", "cl": 115, "ucl": 4, "cal": 119, "tl": 443, "cb": 22, "tb": 22, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.Infrastructure.HealthChecks.ProductsHealthCheck", "rp": "ProductComparisonApi.API_ProductsHealthCheck.html", "cl": 14, "ucl": 0, "cal": 14, "tl": 37, "cb": 2, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "ProductComparisonApi.Application",
     "classes": [
-      { "name": "ProductComparisonApi.Application.Services.ProductService", "rp": "ProductComparisonApi.Application_ProductService.html", "cl": 77, "ucl": 0, "cal": 77, "tl": 132, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "ProductComparisonApi.Application.Services.ProductValidator", "rp": "ProductComparisonApi.Application_ProductValidator.html", "cl": 36, "ucl": 2, "cal": 38, "tl": 73, "cb": 36, "tb": 42, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.Application.Services.ProductService", "rp": "ProductComparisonApi.Application_ProductService.html", "cl": 77, "ucl": 0, "cal": 77, "tl": 133, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
   {
     "name": "ProductComparisonApi.Domain",
@@ -309,9 +310,8 @@ var assemblies = [
   {
     "name": "ProductComparisonApi.Infrastructure",
     "classes": [
-      { "name": "ProductComparisonApi.Infrastructure.HealthChecks.ProductsHealthCheck", "rp": "ProductComparisonApi.Infrastructure_ProductsHealthCheck.html", "cl": 14, "ucl": 0, "cal": 14, "tl": 37, "cb": 2, "tb": 2, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "ProductComparisonApi.Infrastructure.Repositories.ProductRepository", "rp": "ProductComparisonApi.Infrastructure_ProductRepository.html", "cl": 130, "ucl": 4, "cal": 134, "tl": 202, "cb": 21, "tb": 28, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
-      { "name": "ProductComparisonApi.Infrastructure.Services.JsonFileReader", "rp": "ProductComparisonApi.Infrastructure_JsonFileReader.html", "cl": 23, "ucl": 0, "cal": 23, "tl": 47, "cb": 12, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.Infrastructure.Repositories.JsonFileReader", "rp": "ProductComparisonApi.Infrastructure_JsonFileReader.html", "cl": 23, "ucl": 0, "cal": 23, "tl": 47, "cb": 12, "tb": 12, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "ProductComparisonApi.Infrastructure.Repositories.ProductRepository", "rp": "ProductComparisonApi.Infrastructure_ProductRepository.html", "cl": 130, "ucl": 4, "cal": 134, "tl": 202, "cb": 24, "tb": 28, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
 
@@ -326,7 +326,7 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "ProductComparisonApi.Application", "class": "ProductComparisonApi.Application.Services.ProductValidator", "reportPath": "ProductComparisonApi.Application_ProductValidator.html", "methodName": "ValidatePartialProduct(ProductComparisonApi.Domain.Models.UpdateProductRequest)", "methodShortName": "ValidatePartialProduct(...)", "fileIndex": 0, "line": 46,
+    "assembly": "ProductComparisonApi.API", "class": "ProductComparisonApi.API.Validator.ProductValidator", "reportPath": "ProductComparisonApi.API_ProductValidator.html", "methodName": "ValidatePartialProduct(ProductComparisonApi.Domain.Models.UpdateProductRequest)", "methodShortName": "ValidatePartialProduct(...)", "fileIndex": 0, "line": 46,
     "metrics": [
       { "value": 24, "exceeded": false },
       { "value": 22, "exceeded": true },

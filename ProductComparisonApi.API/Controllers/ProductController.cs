@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProductComparisonApi.Domain.Interfaces;
+using ProductComparisonApi.API.Validator;
+using ProductComparisonApi.Application.Interfaces;
 using ProductComparisonApi.Domain.Models;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -12,15 +13,15 @@ namespace ProductComparisonApi.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
-    public class ProductsController : ControllerBase, IProductController
+    public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly IProductValidator _validator;
+        private readonly ProductValidator _validator;
         private readonly ILogger<ProductsController> _logger;
 
         public ProductsController(
             IProductService productService,
-            IProductValidator validator,
+            ProductValidator validator,
             ILogger<ProductsController> logger)
         {
             _productService = productService;

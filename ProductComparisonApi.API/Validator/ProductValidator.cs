@@ -1,10 +1,9 @@
-﻿using ProductComparisonApi.Domain.Interfaces;
-using ProductComparisonApi.Domain.Models;
+﻿using ProductComparisonApi.Domain.Models;
 
-namespace ProductComparisonApi.Application.Services
+namespace ProductComparisonApi.API.Validator
 {
 
-    public class ProductValidator : IProductValidator
+    public class ProductValidator 
     {
 
         public string? ValidateComparisonRequest(ComparisonRequest request)

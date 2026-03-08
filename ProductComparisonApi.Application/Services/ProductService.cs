@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ProductComparisonApi.Application.Interfaces;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Domain.Models;
 

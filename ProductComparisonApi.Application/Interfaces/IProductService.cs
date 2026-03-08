@@ -1,6 +1,6 @@
 ﻿using ProductComparisonApi.Domain.Models;
 
-namespace ProductComparisonApi.Domain.Interfaces
+namespace ProductComparisonApi.Application.Interfaces
 {
     public interface IProductService
     {

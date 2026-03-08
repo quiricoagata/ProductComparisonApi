@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ProductComparisonApi.Application\ProductComparisonApi.Application.csproj" />
-    <ProjectReference Include="..\ProductComparisonApi.Domain\ProductComparisonApi.Domain.csproj" />
     <ProjectReference Include="..\ProductComparisonApi.Infrastructure\ProductComparisonApi.Infrastructure.csproj" />
   </ItemGroup>
 

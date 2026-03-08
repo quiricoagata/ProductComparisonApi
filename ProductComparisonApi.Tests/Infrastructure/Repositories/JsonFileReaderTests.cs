@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Moq;
-using ProductComparisonApi.Infrastructure.Services;
+using ProductComparisonApi.Infrastructure.Repositories;
 using System.Text;
 
-namespace ProductComparisonApi.Tests.Infrastructure.Services
+namespace ProductComparisonApi.Tests.Infrastructure.Repositories
 {
     public class JsonFileReaderTests : IDisposable
     {

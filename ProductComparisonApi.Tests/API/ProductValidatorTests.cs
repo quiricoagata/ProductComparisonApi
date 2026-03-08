@@ -1,7 +1,7 @@
 ﻿using ProductComparisonApi.Domain.Models;
-using ProductComparisonApi.Application.Services;
+using ProductComparisonApi.API.Validator;
 
-namespace ProductComparisonApi.Tests.Application
+namespace ProductComparisonApi.Tests.API
 {
     public class ProductValidatorTests
     {

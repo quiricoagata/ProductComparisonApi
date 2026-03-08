@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
-using ProductComparisonApi.Domain.Interfaces;
 
-namespace ProductComparisonApi.Infrastructure.Services
+namespace ProductComparisonApi.Infrastructure.Repositories
 {
     /// <summary>
     /// Servicio para la lectura y escritura de archivos JSON.
     /// Implementa la interfaz <see cref="IJsonFileReader"/> proporcionando métodos para acceder
     /// al sistema de archivos con validaciones de parámetros de entrada.
     /// </summary>
-    public class JsonFileReader : IJsonFileReader
+    public class JsonFileReader 
     {
         public string JsonPath { get; }
 
