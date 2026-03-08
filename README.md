@@ -80,14 +80,13 @@
 ### 🧭 Diagrama de dependencias
 
 ```
-Tests ──────────┐
-                ├──> API ──────────┐
-                │                 ├──> Infrastructure ──┐
-                ├──> Infrastructure    Application      ├──> Domain
-                │                                      │
-                ├──> Application ─────────────────────┘
-                │
-                └──> Domain (sin dependencias externas)
+| Proyecto | Depende de |
+|----------|-----------|
+| **Tests** | API, Infrastructure, Application, Domain |
+| **API**   | Infrastructure, Application, Domain |
+| **Infrastructure** | Domain |
+| **Application** | Domain |
+| **Domain** | — |
 ```
 
 Las dependencias son forzadas por el compilador: si intentas importar desde un proyecto de nivel superior a uno inferior, obtendrás error de compilación.
@@ -108,7 +107,7 @@ Las dependencias son forzadas por el compilador: si intentas importar desde un p
 ### 1. 📥 Clonar el repositorio
 
 ```bash
-git clone https://github.com/usuario/ProductComparisonApi.git
+git clone https://github.com/quiricoagata/ProductComparisonApi.git
 cd ProductComparisonApi
 ```
 
@@ -194,20 +193,6 @@ exec dotnet ProductComparisonApi.API.dll
 | `ASPNETCORE_ENVIRONMENT` | Entorno de ejecución (`Development`, `Production`) | No | `Production` |
 | `ASPNETCORE_URLS` | URL y puerto de escucha | No | `http://+:8080` |
 | `DATA_PATH` | Ruta base del archivo JSON de productos | No | `AppContext.BaseDirectory` |
-
-### 📝 Ejemplo de `appsettings.Development.json`
-
-```json
-{
-  "Logging": {
-    "LogLevel": {
-      "Default": "Debug",
-      "Microsoft.AspNetCore": "Information"
-    }
-  },
-  "AllowedHosts": "*"
-}
-```
 
 ---
 
@@ -518,9 +503,9 @@ Response<object>.Empty("Producto eliminado correctamente.");
 
 `IProductService` e `IJsonFileReader` permiten intercambiar implementaciones sin tocar el controlador. Si se migra a SQL Server, solo cambia la implementación registrada en `Program.cs`.
 
-#### 🗄️ Repository (parcial)
+#### 🗄️ Service Layern Pattern
 
-`ProductService` centraliza todo el acceso a datos — lectura, escritura y persistencia. El resto de la aplicación no sabe cómo ni dónde están almacenados los productos.
+`ProductService` actúa como capa de servicio que centraliza tanto el acceso a datos como la lógica de negocio asociada a los productos.
 
 #### ➖ Null Object
 
