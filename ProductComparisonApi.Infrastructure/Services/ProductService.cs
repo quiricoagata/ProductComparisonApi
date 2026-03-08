@@ -2,6 +2,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using ProductComparisonApi.Domain.Interfaces;
 using ProductComparisonApi.Domain.Models;
 
@@ -16,7 +17,6 @@ namespace ProductComparisonApi.Infrastructure.Services
 
         private readonly SemaphoreSlim _writeLock = new(1, 1);
 
-
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true,
@@ -26,11 +26,18 @@ namespace ProductComparisonApi.Infrastructure.Services
         public ProductService(
             ILogger<ProductService> logger,
             IWebHostEnvironment env,
-            IJsonFileReader fileReader)
+            IJsonFileReader fileReader,
+            IConfiguration configuration)
         {
             _logger = logger;
             _fileReader = fileReader;
-            _jsonPath = Path.Combine(env.ContentRootPath, "Data", "products.json");
+
+            // En producción usa DATA_PATH (volumen de Railway)
+            // En desarrollo usa el directorio base de la aplicación
+            var dataPath = configuration["DATA_PATH"] ?? AppContext.BaseDirectory;
+            _jsonPath = Path.Combine(dataPath, "Data", "products.json");
+
+            _logger.LogInformation("Ruta del archivo de datos: {Path}", _jsonPath);
 
             if (!_fileReader.FileExists(_jsonPath))
             {
@@ -49,12 +56,11 @@ namespace ProductComparisonApi.Infrastructure.Services
         }
 
         public Task<List<Product>> GetAllAsync() =>
-            Task.FromResult(_products.Values.ToList());
+            Task.FromResult(_products.Values.OrderBy(p => p.Id).ToList());
 
         public Task<Product?> GetByIdAsync(int id) =>
             Task.FromResult(_products.TryGetValue(id, out var product) ? product : null);
 
-   
         public Task<List<Product>> GetByIdsAsync(List<int> ids) =>
             Task.FromResult(ids
                 .Where(id => _products.ContainsKey(id))
@@ -110,7 +116,6 @@ namespace ProductComparisonApi.Infrastructure.Services
             }
             return removed;
         }
-
 
         /// <summary>
         /// Verifica que la fuente de datos (archivo JSON) esté disponible y sea accesible.

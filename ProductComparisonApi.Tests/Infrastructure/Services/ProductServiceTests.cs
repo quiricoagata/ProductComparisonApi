@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 using ProductComparisonApi.Domain.Interfaces;
@@ -24,11 +25,11 @@ namespace ProductComparisonApi.Tests.Infrastructure.Services
 
         public ProductServiceTests()
         {
-            _mockFileReader = new Mock<IJsonFileReader>();
-            _mockLogger = new Mock<ILogger<ProductService>>();
-            _mockEnv = new Mock<IWebHostEnvironment>();
+            _mockFileReader = new();
+            _mockLogger = new();
+            _mockEnv = new();
 
-            _fakeProducts = new List<Product>
+            _fakeProducts = new()
             {
                 new() { Id = 1, Nombre = "Laptop Pro X1", Precio = 1299.99m, Calificacion = 4.7, Descripcion = "Desc 1", UrlImagen = "https://img1.com", Especificaciones = new() { { "RAM", "16GB" } } },
                 new() { Id = 2, Nombre = "Laptop UltraSlim", Precio = 999.99m, Calificacion = 4.3, Descripcion = "Desc 2", UrlImagen = "https://img2.com", Especificaciones = new() { { "RAM", "8GB" } } },
@@ -36,7 +37,7 @@ namespace ProductComparisonApi.Tests.Infrastructure.Services
             };
 
             _mockEnv.Setup(e => e.ContentRootPath).Returns("");
-            _fakePath = Path.Combine("", "Data", "products.json");
+            _fakePath = Path.Combine(AppContext.BaseDirectory, "Data", "products.json");
 
             _mockFileReader.Setup(f => f.FileExists(_fakePath)).Returns(true);
             _mockFileReader.Setup(f => f.ReadAllText(_fakePath))
@@ -46,10 +47,12 @@ namespace ProductComparisonApi.Tests.Infrastructure.Services
                 .Returns(Task.CompletedTask);
         }
 
-        private ProductService CreateService() =>
-            new ProductService(_mockLogger.Object, _mockEnv.Object, _mockFileReader.Object);
+        private ProductService CreateService()
+        {
+            var mockConfig = new Mock<IConfiguration>();
+            return new ProductService(_mockLogger.Object, _mockEnv.Object, _mockFileReader.Object, mockConfig.Object);
+        }
 
-        // ── GetAllAsync ───────────────────────────────────────────────
 
         [Fact]
         public async Task GetAllAsync_ExistenProductos_RetornaTodosLosProductos()
@@ -429,25 +432,25 @@ namespace ProductComparisonApi.Tests.Infrastructure.Services
         }
 
         [Fact]
-        public void Constructor_CargaProductosEnElDiccionario_CantidadCorrecta()
+        public async Task Constructor_CargaProductosEnElDiccionario_CantidadCorrecta()
         {
             var service = CreateService();
 
             // Verifica que el ConcurrentDictionary se pobló correctamente desde el JSON
-            var result = service.GetAllAsync().Result;
+            var result = await service.GetAllAsync();
             Assert.Equal(3, result.Count);
         }
 
         [Fact]
-        public void Constructor_CargaProductosEnElDiccionario_IdsComoClaves()
+        public async Task Constructor_CargaProductosEnElDiccionario_IdsComoClaves()
         {
             var service = CreateService();
 
             // Verifica que los IDs del JSON se usaron como claves del diccionario
             // comprobando que la búsqueda por ID funciona correctamente
-            var p1 = service.GetByIdAsync(1).Result;
-            var p2 = service.GetByIdAsync(2).Result;
-            var p3 = service.GetByIdAsync(3).Result;
+            var p1 = await service.GetByIdAsync(1);
+            var p2 = await service.GetByIdAsync(2);
+            var p3 = await service.GetByIdAsync(3);
 
             Assert.NotNull(p1);
             Assert.NotNull(p2);
