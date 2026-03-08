@@ -14,17 +14,23 @@ para generación de código, tests, casos de prueba, documentación y diagramas 
 
 ## 1. Generación de tests unitarios
 **Herramienta:** GitHub Copilot  
-**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
+**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
 ```
 Generá tests unitarios completos para todos los archivos referenciados usando xUnit 2.x y Moq 4.x.
 
 ESTRUCTURA:
 ProductComparisonApi.Tests/
-├── Controllers/ProductsControllerTests.cs              → namespace ProductComparisonApi.Tests.Controllers
-├── Application/Services/ProductServiceTests.cs         → namespace ProductComparisonApi.Tests.Application.Services
-├── Application/Services/ProductValidatorTests.cs       → namespace ProductComparisonApi.Tests.Application.Services
-├── Infrastructure/Repositories/ProductRepositoryTests.cs → namespace ProductComparisonApi.Tests.Infrastructure.Repositories
-└── Infrastructure/HealthChecks/ProductsHealthCheckTests.cs → namespace ProductComparisonApi.Tests.Infrastructure.HealthChecks
+├── API/
+│   ├── ProductControllerTests.cs       → namespace ProductComparisonApi.Tests.API
+│   ├── ProductsHealthCheckTests.cs      → namespace ProductComparisonApi.Tests.API
+│   └── ProductValidatorTests.cs         → namespace ProductComparisonApi.Tests.API
+├── Application/
+│   └── Services/
+│       └── ProductServiceTests.cs       → namespace ProductComparisonApi.Tests.Application.Services
+└── Infrastructure/
+    └── Repositories/
+        ├── ProductRepositoryTests.cs    → namespace ProductComparisonApi.Tests.Infrastructure.Repositories
+        └── JsonFileReaderTests.cs       → namespace ProductComparisonApi.Tests.Infrastructure.Repositories
 
 REGLAS GENERALES:
 - Patrón Arrange / Act / Assert con comentarios explícitos
@@ -36,7 +42,7 @@ COBERTURA MÍNIMA: ProductValidator ~95% | Controller ~95% | ProductService ~95%
 Cubrí: happy path, casos de error, casos límite, concurrencia y constructor de ProductRepository.
 
 ESPECÍFICO POR CLASE:
-- Controller: mockeá IProductService e IProductValidator. Verificá tipo de resultado y contenido de Response<T>.
+- Controller: mockeá IProductService y ProductValidator. Verificá tipo de resultado y contenido de Response<T>.
 - ProductService (Application): mockeá IProductRepository e ILogger.
   Verificá que cada método delega correctamente al repository.
   Cubrí: delegación exitosa, propagación de KeyNotFoundException y propagación de excepciones de I/O.
@@ -52,7 +58,7 @@ ESPECÍFICO POR CLASE:
 
 ## 2. Generación/Mejora del README
 **Herramienta:** GitHub Copilot / Claude (Anthropic)  
-**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#IProductValidator.cs` `#IJsonFileReader.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
+**Archivos de referencia:** `#ProductController.cs` `#ProductService.cs` `#ProductRepository.cs` `#ProductValidator.cs` `#ProductsHealthCheck.cs` `#IProductService.cs` `#IProductRepository.cs` `#Product.cs` `#Response.cs` `#ComparisonRequest.cs` `#UpdateProductRequest.cs`
 ```
 Generá un README.md completo y profesional. Extraé nombres de clases, rutas,
 namespaces y configuraciones directamente del código. No inventes nada.
@@ -109,6 +115,12 @@ Generá un diagrama Mermaid graph LR usando como referencia #solution
 #JsonFileReader.cs #ProductsHealthCheck.cs #ProductValidator.cs #products.json
 que muestre las capas de la aplicación de forma horizontal
 con todas las conexiones y métodos intermedios.
+
+ESTRUCTURA ACTUAL:
+- API: ProductController, ProductsHealthCheck, ProductValidator, Program.cs
+- Application: IProductService, ProductService
+- Infrastructure: ProductRepository, JsonFileReader, products.json
+- Domain: IProductRepository, Product, Response, ComparisonRequest, UpdateProductRequest
 ```
 
 ---
